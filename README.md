@@ -10,7 +10,7 @@ There are some runnable examples in `/examples`. Just navigate to that folder an
 ```bash
 gopherjs serve
 ```
-Then navigate to http://localhost:8080/github.com/bep/gr/examples/
+Then navigate to [http://localhost:8080/github.com/bep/gr/examples/](http://localhost:8080/github.com/bep/gr/examples/).
 
 For help installing Gopherjs, please visit [that cool project](https://github.com/gopherjs/gopherjs).
 
