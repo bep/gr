@@ -77,15 +77,6 @@ func (e *Element) createElement() *js.Object {
 		children := make([]interface{}, len(e.children))
 
 		for _, c := range e.children {
-			if e.properties == nil {
-				e.properties = make(map[string]interface{})
-			}
-
-			if _, ok := e.properties["key"]; !ok {
-				e.properties["key"] = counter
-				counter++
-			}
-
 			children = append(children, c.Node())
 		}
 
