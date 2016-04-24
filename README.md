@@ -1,5 +1,5 @@
 # Go React
-[GopherJS](https://github.com/gopherjs/gopherjs)) bindings for Facebook React. 
+[GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
 
 **NOTE: Very early and not usable ... yet.**
 
