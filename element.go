@@ -9,10 +9,20 @@ type Modifier interface {
 	Modify(element *Element)
 }
 
+type incrementor struct {
+	counter int
+}
+
+func (i *incrementor) next() int {
+	i.counter++
+	return i.counter
+}
+
 type Element struct {
-	tag        string
-	properties map[string]interface{}
-	style      map[string]interface{}
+	tag            string
+	properties     map[string]interface{}
+	style          map[string]interface{}
+	eventListeners []*EventListener
 
 	// An element is either a text node or a container with children.
 	text     string
@@ -21,6 +31,8 @@ type Element struct {
 	// This is the actual ReactJS element.
 	// ReactElement, ReactText or a ReactFragment
 	element *js.Object
+
+	*This
 }
 
 func NewElement(tag string) *Element {
@@ -29,7 +41,9 @@ func NewElement(tag string) *Element {
 
 func (e *Element) Node() *js.Object {
 	if e.element == nil {
+		// TODO(bep) check reusability
 		e.element = e.createElement()
+
 	}
 
 	return e.element
@@ -49,19 +63,10 @@ func (mods Modifiers) Modify(e *Element) {
 	}
 }
 
-// TODO(bep)
-var counter = 1
-
 func (e *Element) createElement() *js.Object {
-	// TODO(bep) figure a better way to add keys.
 
 	if e.properties == nil {
 		e.properties = make(map[string]interface{})
-	}
-
-	if _, ok := e.properties["key"]; !ok {
-		e.properties["key"] = counter
-		counter++
 	}
 
 	if len(e.style) != 0 {

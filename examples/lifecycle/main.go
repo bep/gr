@@ -14,18 +14,25 @@ type lifecycle int
 
 // Implements the Renderer interface.
 func (l lifecycle) Render(this *gr.This) gr.Component {
+	println("Render")
 	return el.Div(el.Header2(
 		gr.Text("Look at the lifecycle events in your console."),
-		gr.Style("color", "blue")))
+		gr.Style("color", this.State()["color"])))
+}
+
+// Implements the StateInitializer interface.
+func (l lifecycle) GetInitialState(this *gr.This) gr.State {
+	println("GetInitialState")
+	return gr.State{"color": "blue"}
 }
 
 // Implements the ShouldComponentUpdate interface
-func (l lifecycle) ShouldComponentUpdate(this *gr.This, nextProps, p gr.Props) bool {
-	return this.Props.HasChanged(nextProps, "prop")
+func (l lifecycle) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+	return this.Props().HasChanged(nextProps, "prop")
 }
 
 // Implements the ComponentWillUpdate interface
-func (l lifecycle) ComponentWillUpdate(this *gr.This, nextProps, p gr.Props) {
+func (l lifecycle) ComponentWillUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) {
 	println("ComponentWillUpdate")
 }
 
@@ -35,7 +42,7 @@ func (l lifecycle) ComponentWillReceiveProps(this *gr.This, p gr.Props) {
 }
 
 // Implements the ComponentDidUpdate interface
-func (l lifecycle) ComponentDidUpdate(this *gr.This, nextProps, p gr.Props) {
+func (l lifecycle) ComponentDidUpdate(this *gr.This, props gr.Props, state gr.State) {
 	println("ComponentDidUpdate")
 }
 

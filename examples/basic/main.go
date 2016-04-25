@@ -16,19 +16,18 @@ type elapser int
 
 // Implements the Renderer interface.
 func (e elapser) Render(this *gr.This) gr.Component {
-	elapsed := this.Props["elapsed"]
+	elapsed := this.Props()["elapsed"]
 	message := fmt.Sprintf("React has been successfully running for '%v' seconds.", elapsed)
 
 	return examples.Alert("success", el.Strong(gr.Text(message)))
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (e elapser) ShouldComponentUpdate(this *gr.This, nextProps, p gr.Props) bool {
-	return this.Props.HasChanged(nextProps, "elapsed")
+func (e elapser) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+	return this.Props().HasChanged(nextProps, "elapsed")
 }
 
 func main() {
-
 	start := time.Now().Unix()
 	comp := gr.NewRoot(new(elapser))
 
