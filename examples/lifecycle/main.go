@@ -63,11 +63,14 @@ func (l lifecycle) ComponentWillUnmount(this *gr.This) {
 
 func main() {
 
-	component := gr.New(new(lifecycle))
-	props := gr.Props{}
-	counter := 1
+	var (
+		component = gr.New(new(lifecycle))
+		props     = gr.Props{}
+		counter   = 1
+	)
 
 	quit := gr.RenderLoop(func() {
+		// Only update now and then.
 		props["prop"] = counter%100 == 0
 		counter++
 		component.Render("react", props)

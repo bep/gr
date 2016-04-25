@@ -36,7 +36,9 @@ func (c clickCounter) onClick(this *gr.This, event *gr.Event) {
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (e clickCounter) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+func (e clickCounter) ShouldComponentUpdate(
+	this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+
 	return this.State().HasChanged(nextState, "counter")
 }
 
