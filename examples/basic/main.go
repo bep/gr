@@ -29,10 +29,10 @@ func (e elapser) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextSt
 
 func main() {
 	start := time.Now().Unix()
-	comp := gr.NewRoot(new(elapser))
+	component := gr.New(new(elapser))
 
 	gr.RenderLoop(func() {
 		props := gr.Props{"elapsed": (time.Now().Unix() - start)}
-		comp.Render("react", props)
+		component.Render("react", props)
 	})
 }

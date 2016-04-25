@@ -23,7 +23,7 @@ type Root struct {
 	*This
 }
 
-func NewRoot(r Renderer) *Root {
+func New(r Renderer) *Root {
 	root := &Root{renderer: r}
 
 	classProps := make(map[string]*js.Object)

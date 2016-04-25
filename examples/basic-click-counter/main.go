@@ -41,9 +41,9 @@ func (e clickCounter) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, n
 }
 
 func main() {
-	comp := gr.NewRoot(new(clickCounter))
+	component := gr.New(new(clickCounter))
 
 	gr.RenderLoop(func() {
-		comp.Render("react", gr.Props{})
+		component.Render("react", gr.Props{})
 	})
 }
