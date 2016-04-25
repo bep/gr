@@ -10,6 +10,33 @@ import (
 // Simple example demonstrating the avilable lifecycle hooks.
 // See also https://facebook.github.io/react/docs/component-specs.html
 
+func main() {
+
+	var (
+		component = gr.New(new(lifecycle))
+		props     = gr.Props{}
+		counter   = 1
+	)
+
+	quit := gr.RenderLoop(func() {
+		// Only update now and then.
+		props["prop"] = counter%100 == 0
+		counter++
+		component.Render("react", props)
+	})
+
+	time.Sleep(10 * time.Second)
+
+	// Stop the render loop
+	close(quit)
+
+	if !gr.UnmountComponentAtNode("react") {
+		panic("Unmount failed")
+	}
+
+	time.Sleep(10 * time.Second)
+}
+
 type lifecycle int
 
 // Implements the Renderer interface.
@@ -59,32 +86,4 @@ func (l lifecycle) ComponentDidMount(this *gr.This) {
 // Implements the ComponentWillUnmount interface
 func (l lifecycle) ComponentWillUnmount(this *gr.This) {
 	println("ComponentWillUnmount")
-}
-
-func main() {
-
-	var (
-		component = gr.New(new(lifecycle))
-		props     = gr.Props{}
-		counter   = 1
-	)
-
-	quit := gr.RenderLoop(func() {
-		// Only update now and then.
-		props["prop"] = counter%100 == 0
-		counter++
-		component.Render("react", props)
-	})
-
-	time.Sleep(10 * time.Second)
-
-	// Stop the render loop
-	close(quit)
-
-	if !gr.UnmountComponentAtNode("react") {
-		panic("Unmount failed")
-	}
-
-	time.Sleep(10 * time.Second)
-
 }

@@ -11,6 +11,14 @@ import (
 // Basic click counter example similar to:
 // https://github.com/facebook/react/blob/master/examples/basic-click-counter/index.html
 
+func main() {
+	component := gr.New(new(clickCounter))
+
+	gr.RenderLoop(func() {
+		component.Render("react", gr.Props{})
+	})
+}
+
 type clickCounter int
 
 // Implements the StateInitializer interface.
@@ -21,7 +29,6 @@ func (c clickCounter) GetInitialState(this *gr.This) gr.State {
 // Implements the Renderer interface.
 func (c clickCounter) Render(this *gr.This) gr.Component {
 	counter := this.State()["counter"]
-
 	message := fmt.Sprintf(" Click me! Number of clicks: %v", counter)
 
 	return el.Div(
@@ -40,12 +47,4 @@ func (e clickCounter) ShouldComponentUpdate(
 	this *gr.This, nextProps gr.Props, nextState gr.State) bool {
 
 	return this.State().HasChanged(nextState, "counter")
-}
-
-func main() {
-	component := gr.New(new(clickCounter))
-
-	gr.RenderLoop(func() {
-		component.Render("react", gr.Props{})
-	})
 }
