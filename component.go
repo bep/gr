@@ -15,16 +15,15 @@ type Component interface {
 
 // The root component.
 type Root struct {
+	// The React.createClass response.
 	node *js.Object
 
 	// The minimum interface needed to display something.
-	renderer Renderer
-
-	*This
+	r Renderer
 }
 
 func New(r Renderer) *Root {
-	root := &Root{renderer: r}
+	root := &Root{r: r}
 
 	classProps := make(map[string]*js.Object)
 
@@ -81,8 +80,8 @@ func (r *Root) Node() *js.Object {
 func (r *Root) Render(elementID string, props Props) {
 	container := js.Global.Get("document").Call("getElementById", elementID)
 	elm := react.Call("createElement", r.node, props)
-	rendered := reactDOM.Call("render", elm, container)
-	r.This = makeThis(rendered)
+	// TODO(bep) evaluate if the need the "this" returned on render.
+	reactDOM.Call("render", elm, container)
 }
 
 type Props map[string]interface{}
