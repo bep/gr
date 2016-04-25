@@ -10,7 +10,13 @@ const (
 	defaultWaitTime        = 1000 / defaultFramesPerSecond
 )
 
-func RenderLoop(render func()) chan struct{} {
+func RenderLoop(render func(), interval ...time.Duration) chan struct{} {
+
+	renderInterval := defaultWaitTime * time.Millisecond
+
+	if len(interval) > 0 {
+		renderInterval = interval[0]
+	}
 
 	quit := make(chan struct{})
 
@@ -19,7 +25,7 @@ func RenderLoop(render func()) chan struct{} {
 			// TODO(bep): Use this in browsers that supports it.
 			//ran := js.Global.Get("requestAnimationFrame")
 			select {
-			case <-time.After(defaultWaitTime * time.Millisecond):
+			case <-time.After(renderInterval):
 				render()
 			case <-quit:
 				return
