@@ -268,7 +268,7 @@ func addEventListeners(c Component, that *This) {
 				if l.preventDefault {
 					event.Call("preventDefault")
 				}
-				l.listener(&Event{target: event.Get("target"), This: that})
+				l.listener(that, &Event{target: event.Get("target")})
 			}
 
 			e.properties[l.name] = l.delegate
