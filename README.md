@@ -12,7 +12,7 @@ gopherjs serve
 ```
 Then navigate to [http://localhost:8080/github.com/bep/gr/examples/](http://localhost:8080/github.com/bep/gr/examples/).
 
-To get a sense of the API, here is the [click-counter](https://raw.githubusercontent.com/bep/gr/master/examples/basic-click-counter/main.go) example:
+To get a sense of the API, here is the [click-counter](https://github.com/bep/gr/blob/master/examples/basic-click-counter/main.go) example:
 
 ```go
 func main() {
@@ -33,7 +33,7 @@ func (c clickCounter) GetInitialState(this *gr.This) gr.State {
 // Implements the Renderer interface.
 func (c clickCounter) Render(this *gr.This) gr.Component {
 	counter := this.State()["counter"]
-	message := fmt.Sprintf(" Click me! Number of clicks: %v", counter)
+	message := fmt.Sprintf("Click me! Number of clicks: %v", counter)
 
 	return el.Div(
 		el.Button(
