@@ -77,8 +77,15 @@ func (r *Root) Node() *js.Object {
 	return r.node
 }
 
+// TODO(bep) ...
+func (r *Root) CreateElement(props Props) *Element {
+	elm := react.Call("createElement", r.node, props)
+	return &Element{element: elm}
+}
+
 func (r *Root) Render(elementID string, props Props) {
 	container := js.Global.Get("document").Call("getElementById", elementID)
+
 	elm := react.Call("createElement", r.node, props)
 	// TODO(bep) evaluate if the need the "this" returned on render.
 	reactDOM.Call("render", elm, container)
