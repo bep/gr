@@ -61,6 +61,9 @@ func toInt(i interface{}) int {
 	case float64:
 		return int(v)
 	case string:
+		if v == "" {
+			return 0
+		}
 		iv, err := strconv.ParseInt(v, 0, 0)
 		if err == nil {
 			return int(iv)
