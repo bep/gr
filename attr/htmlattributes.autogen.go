@@ -3,7 +3,8 @@
 // Package attr defines markup to create HTML attributes supported by Facebook React.
 //
 // Created from "HTML Attributes" as defined by Facebook in
-// https://facebook.github.io/react/docs/tags-and-attributes.html
+// - https://facebook.github.io/react/docs/tags-and-attributes.html
+// - http://facebook.github.io/react/docs/special-non-dom-attributes.html
 
 package attr
 
@@ -702,4 +703,23 @@ func Results(v string) gr.Modifier {
 // AutoSave creates an HTML attribute for 'autoSave'.
 func AutoSave(v string) gr.Modifier {
 	return gr.Prop("autoSave", v)
+}
+
+// Key adds an optional, unique identifier. 
+// When your component shuffles around during render passes, it might be destroyed 
+// and recreated due to the diff algorithm. Assigning it a key that persists makes 
+// sure the component stays.
+func Key(v string) gr.Modifier {
+	return gr.Prop("key", v)
+}
+
+// Ref adds an ref to a component, see http://facebook.github.io/react/docs/more-about-refs.html
+func Ref(v string) gr.Modifier {
+	return gr.Prop("ref", v)
+}
+
+// DangerouslySetInnerHTML Provides the ability to insert raw HTML, 
+// mainly for cooperating with DOM string manipulation libraries.
+func DangerouslySetInnerHTML(v string) gr.Modifier {
+	return gr.Prop("dangerouslySetInnerHTML", v)
 }
