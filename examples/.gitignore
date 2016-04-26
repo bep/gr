@@ -1,3 +1,4 @@
 **/*.js
 **/basic*
 **/lifecycle*
+**/composition*

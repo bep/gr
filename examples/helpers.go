@@ -9,6 +9,25 @@ import (
 	"github.com/bep/gr/evt"
 )
 
+// Example is a wrapper for the examples
+func Example(title string, mods ...gr.Modifier) *gr.Element {
+	links := el.UnorderedList(
+		el.ListItem(el.Anchor(attr.HRef("../basic"), gr.Text("Basic"))),
+		el.ListItem(el.Anchor(attr.HRef("../basic-click-counter"), gr.Text("Basic Click-counter"))),
+		el.ListItem(el.Anchor(attr.HRef("../composition"), gr.Text("Component Composition"))),
+		el.ListItem(el.Anchor(attr.HRef("../lifecycle"), gr.Text("Lifecycle"))),
+	)
+
+	elem := el.Div(gr.CSS("panel", "panel-primary"),
+		el.Div(gr.CSS("panel-heading"), el.Header1(gr.Text(title))),
+		el.Div(append(mods, gr.CSS("panel-body"))...),
+		el.Div(gr.CSS("panel-footer"),
+			el.Div(
+				el.Emphasis(gr.Text("Go React Examples:")), links)))
+
+	return elem
+}
+
 // Alert creates a Bootstrap alert element.
 func Alert(classifier string, body gr.Modifier) *gr.Element {
 	e := el.Div(

@@ -32,11 +32,12 @@ var clickCounter = gr.New(new(examples.ClickCounter))
 func (e elapser) Render(this *gr.This) gr.Component {
 	elapsed := this.Props()["elapsed"]
 	message := fmt.Sprintf("React has been successfully running for '%v' seconds.", elapsed)
-	return el.Div(
-		el.Header1(gr.Text("Component Composition Example")),
+	elem := el.Div(
 		examples.Alert("info", el.Strong(gr.Text(message))),
 		clickCounter.CreateElement(nil),
 	)
+
+	return examples.Example("Component Composition", elem)
 }
 
 // Implements the ShouldComponentUpdate interface.

@@ -5,6 +5,7 @@ import (
 
 	"github.com/bep/gr"
 	"github.com/bep/gr/el"
+	"github.com/bep/gr/examples"
 )
 
 // Simple example demonstrating the avilable lifecycle hooks.
@@ -42,9 +43,11 @@ type lifecycle int
 // Implements the Renderer interface.
 func (l lifecycle) Render(this *gr.This) gr.Component {
 	println("Render")
-	return el.Div(el.Header2(
+	elem := el.Div(el.Header2(
 		gr.Text("Look at the lifecycle events in your console."),
 		gr.Style("color", this.State()["color"])))
+
+	return examples.Example("Lifecycle", elem)
 }
 
 // Implements the StateInitializer interface.
