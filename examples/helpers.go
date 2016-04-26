@@ -26,7 +26,9 @@ func Example(title string, mods ...gr.Modifier) *gr.Element {
 			el.Header3(gr.Text("More examples")), links)...),
 		el.Div(gr.CSS("panel-footer"),
 			el.Div(
-				el.Emphasis(gr.Text("Facebook React in Go")))))
+				el.Emphasis(gr.Text("Facebook React in Go: ")),
+				el.Anchor(attr.HRef("https://github.com/bep/gr/"),
+					gr.Text("https://github.com/bep/gr/")))))
 
 	return elem
 }
