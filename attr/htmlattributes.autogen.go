@@ -10,6 +10,11 @@ package attr
 
 import "github.com/bep/gr"
 
+// About creates an HTML attribute for 'about'.
+func About(v string) gr.Modifier {
+	return gr.Prop("about", v)
+}
+
 // Accept creates an HTML attribute for 'accept'.
 func Accept(v string) gr.Modifier {
 	return gr.Prop("accept", v)
@@ -50,9 +55,19 @@ func Async(v string) gr.Modifier {
 	return gr.Prop("async", v)
 }
 
+// AutoCapitalize creates an HTML attribute for 'autoCapitalize'.
+func AutoCapitalize(v string) gr.Modifier {
+	return gr.Prop("autoCapitalize", v)
+}
+
 // AutoComplete creates an HTML attribute for 'autoComplete'.
 func AutoComplete(v string) gr.Modifier {
 	return gr.Prop("autoComplete", v)
+}
+
+// AutoCorrect creates an HTML attribute for 'autoCorrect'.
+func AutoCorrect(v string) gr.Modifier {
+	return gr.Prop("autoCorrect", v)
 }
 
 // AutoFocus creates an HTML attribute for 'autoFocus'.
@@ -63,6 +78,11 @@ func AutoFocus(v string) gr.Modifier {
 // AutoPlay creates an HTML attribute for 'autoPlay'.
 func AutoPlay(v string) gr.Modifier {
 	return gr.Prop("autoPlay", v)
+}
+
+// AutoSave creates an HTML attribute for 'autoSave'.
+func AutoSave(v string) gr.Modifier {
+	return gr.Prop("autoSave", v)
 }
 
 // Capture creates an HTML attribute for 'capture'.
@@ -115,6 +135,11 @@ func ColSpan(v string) gr.Modifier {
 	return gr.Prop("colSpan", v)
 }
 
+// Color creates an HTML attribute for 'color'.
+func Color(v string) gr.Modifier {
+	return gr.Prop("color", v)
+}
+
 // Cols creates an HTML attribute for 'cols'.
 func Cols(v string) gr.Modifier {
 	return gr.Prop("cols", v)
@@ -150,9 +175,20 @@ func CrossOrigin(v string) gr.Modifier {
 	return gr.Prop("crossOrigin", v)
 }
 
+// DangerouslySetInnerHTML Provides the ability to insert raw HTML, 
+// mainly for cooperating with DOM string manipulation libraries.
+func DangerouslySetInnerHTML(v string) gr.Modifier {
+	return gr.Prop("dangerouslySetInnerHTML", v)
+}
+
 // Data creates an HTML attribute for 'data'.
 func Data(v string) gr.Modifier {
 	return gr.Prop("data", v)
+}
+
+// Datatype creates an HTML attribute for 'datatype'.
+func Datatype(v string) gr.Modifier {
+	return gr.Prop("datatype", v)
 }
 
 // DateTime creates an HTML attribute for 'dateTime'.
@@ -280,6 +316,11 @@ func ID(v string) gr.Modifier {
 	return gr.Prop("id", v)
 }
 
+// Inlist creates an HTML attribute for 'inlist'.
+func Inlist(v string) gr.Modifier {
+	return gr.Prop("inlist", v)
+}
+
 // InputMode creates an HTML attribute for 'inputMode'.
 func InputMode(v string) gr.Modifier {
 	return gr.Prop("inputMode", v)
@@ -293,6 +334,19 @@ func Integrity(v string) gr.Modifier {
 // Is creates an HTML attribute for 'is'.
 func Is(v string) gr.Modifier {
 	return gr.Prop("is", v)
+}
+
+// ItemProp creates an HTML attribute for 'itemProp'.
+func ItemProp(v string) gr.Modifier {
+	return gr.Prop("itemProp", v)
+}
+
+// Key adds an optional, unique identifier. 
+// When your component shuffles around during render passes, it might be destroyed 
+// and recreated due to the diff algorithm. Assigning it a key that persists makes 
+// sure the component stays.
+func Key(v string) gr.Modifier {
+	return gr.Prop("key", v)
 }
 
 // KeyParams creates an HTML attribute for 'keyParams'.
@@ -435,6 +489,11 @@ func Poster(v string) gr.Modifier {
 	return gr.Prop("poster", v)
 }
 
+// Prefix creates an HTML attribute for 'prefix'.
+func Prefix(v string) gr.Modifier {
+	return gr.Prop("prefix", v)
+}
+
 // Preload creates an HTML attribute for 'preload'.
 func Preload(v string) gr.Modifier {
 	return gr.Prop("preload", v)
@@ -443,6 +502,11 @@ func Preload(v string) gr.Modifier {
 // Profile creates an HTML attribute for 'profile'.
 func Profile(v string) gr.Modifier {
 	return gr.Prop("profile", v)
+}
+
+// Property creates an HTML attribute for 'property'.
+func Property(v string) gr.Modifier {
+	return gr.Prop("property", v)
 }
 
 // RadioGroup creates an HTML attribute for 'radioGroup'.
@@ -455,6 +519,11 @@ func ReadOnly(v string) gr.Modifier {
 	return gr.Prop("readOnly", v)
 }
 
+// Ref adds an ref to a component, see http://facebook.github.io/react/docs/more-about-refs.html
+func Ref(v string) gr.Modifier {
+	return gr.Prop("ref", v)
+}
+
 // Rel creates an HTML attribute for 'rel'.
 func Rel(v string) gr.Modifier {
 	return gr.Prop("rel", v)
@@ -463,6 +532,16 @@ func Rel(v string) gr.Modifier {
 // Required creates an HTML attribute for 'required'.
 func Required(v string) gr.Modifier {
 	return gr.Prop("required", v)
+}
+
+// Resource creates an HTML attribute for 'resource'.
+func Resource(v string) gr.Modifier {
+	return gr.Prop("resource", v)
+}
+
+// Results creates an HTML attribute for 'results'.
+func Results(v string) gr.Modifier {
+	return gr.Prop("results", v)
 }
 
 // Reversed creates an HTML attribute for 'reversed'.
@@ -508,6 +587,11 @@ func Scrolling(v string) gr.Modifier {
 // Seamless creates an HTML attribute for 'seamless'.
 func Seamless(v string) gr.Modifier {
 	return gr.Prop("seamless", v)
+}
+
+// Security creates an HTML attribute for 'security'.
+func Security(v string) gr.Modifier {
+	return gr.Prop("security", v)
 }
 
 // Selected creates an HTML attribute for 'selected'.
@@ -600,6 +684,16 @@ func Type(v string) gr.Modifier {
 	return gr.Prop("type", v)
 }
 
+// Typeof creates an HTML attribute for 'typeof'.
+func Typeof(v string) gr.Modifier {
+	return gr.Prop("typeof", v)
+}
+
+// Unselectable creates an HTML attribute for 'unselectable'.
+func Unselectable(v string) gr.Modifier {
+	return gr.Prop("unselectable", v)
+}
+
 // UseMap creates an HTML attribute for 'useMap'.
 func UseMap(v string) gr.Modifier {
 	return gr.Prop("useMap", v)
@@ -608,6 +702,11 @@ func UseMap(v string) gr.Modifier {
 // Value creates an HTML attribute for 'value'.
 func Value(v string) gr.Modifier {
 	return gr.Prop("value", v)
+}
+
+// Vocab creates an HTML attribute for 'vocab'.
+func Vocab(v string) gr.Modifier {
+	return gr.Prop("vocab", v)
 }
 
 // Width creates an HTML attribute for 'width'.
@@ -623,103 +722,4 @@ func Wmode(v string) gr.Modifier {
 // Wrap creates an HTML attribute for 'wrap'.
 func Wrap(v string) gr.Modifier {
 	return gr.Prop("wrap", v)
-}
-
-// About creates an HTML attribute for 'about'.
-func About(v string) gr.Modifier {
-	return gr.Prop("about", v)
-}
-
-// Datatype creates an HTML attribute for 'datatype'.
-func Datatype(v string) gr.Modifier {
-	return gr.Prop("datatype", v)
-}
-
-// Inlist creates an HTML attribute for 'inlist'.
-func Inlist(v string) gr.Modifier {
-	return gr.Prop("inlist", v)
-}
-
-// Prefix creates an HTML attribute for 'prefix'.
-func Prefix(v string) gr.Modifier {
-	return gr.Prop("prefix", v)
-}
-
-// Property creates an HTML attribute for 'property'.
-func Property(v string) gr.Modifier {
-	return gr.Prop("property", v)
-}
-
-// Resource creates an HTML attribute for 'resource'.
-func Resource(v string) gr.Modifier {
-	return gr.Prop("resource", v)
-}
-
-// Typeof creates an HTML attribute for 'typeof'.
-func Typeof(v string) gr.Modifier {
-	return gr.Prop("typeof", v)
-}
-
-// Vocab creates an HTML attribute for 'vocab'.
-func Vocab(v string) gr.Modifier {
-	return gr.Prop("vocab", v)
-}
-
-// AutoCapitalize creates an HTML attribute for 'autoCapitalize'.
-func AutoCapitalize(v string) gr.Modifier {
-	return gr.Prop("autoCapitalize", v)
-}
-
-// AutoCorrect creates an HTML attribute for 'autoCorrect'.
-func AutoCorrect(v string) gr.Modifier {
-	return gr.Prop("autoCorrect", v)
-}
-
-// Color creates an HTML attribute for 'color'.
-func Color(v string) gr.Modifier {
-	return gr.Prop("color", v)
-}
-
-// ItemProp creates an HTML attribute for 'itemProp'.
-func ItemProp(v string) gr.Modifier {
-	return gr.Prop("itemProp", v)
-}
-
-// Security creates an HTML attribute for 'security'.
-func Security(v string) gr.Modifier {
-	return gr.Prop("security", v)
-}
-
-// Unselectable creates an HTML attribute for 'unselectable'.
-func Unselectable(v string) gr.Modifier {
-	return gr.Prop("unselectable", v)
-}
-
-// Results creates an HTML attribute for 'results'.
-func Results(v string) gr.Modifier {
-	return gr.Prop("results", v)
-}
-
-// AutoSave creates an HTML attribute for 'autoSave'.
-func AutoSave(v string) gr.Modifier {
-	return gr.Prop("autoSave", v)
-}
-
-// Key adds an optional, unique identifier. 
-// When your component shuffles around during render passes, it might be destroyed 
-// and recreated due to the diff algorithm. Assigning it a key that persists makes 
-// sure the component stays.
-func Key(v string) gr.Modifier {
-	return gr.Prop("key", v)
-}
-
-// Ref adds an ref to a component, see http://facebook.github.io/react/docs/more-about-refs.html
-func Ref(v string) gr.Modifier {
-	return gr.Prop("ref", v)
-}
-
-// DangerouslySetInnerHTML Provides the ability to insert raw HTML, 
-// mainly for cooperating with DOM string manipulation libraries.
-func DangerouslySetInnerHTML(v string) gr.Modifier {
-	return gr.Prop("dangerouslySetInnerHTML", v)
 }

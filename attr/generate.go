@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 )
 
@@ -50,6 +51,7 @@ import "github.com/bep/gr"
 `)
 
 	words := strings.Fields(source)
+	sort.Strings(words)
 
 	for _, w := range words {
 		funcName := strings.Title(w)
