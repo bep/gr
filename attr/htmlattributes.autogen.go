@@ -714,8 +714,8 @@ func Width(v string) gr.Modifier {
 	return gr.Prop("width", v)
 }
 
-// Wmode creates an HTML attribute for 'wmode'.
-func Wmode(v string) gr.Modifier {
+// WMode creates an HTML attribute for 'wmode'.
+func WMode(v string) gr.Modifier {
 	return gr.Prop("wmode", v)
 }
 

@@ -33,7 +33,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	replacements := strings.NewReplacer("Html", "HTML", "Http", "HTTP", "Href", "HRef", "Id", "ID")
+	replacements := strings.NewReplacer(
+		"Html", "HTML", "Http", "HTTP",
+		"Href", "HRef", "Id", "ID",
+		"Wmode", "WMode")
 
 	source := string(b)
 
