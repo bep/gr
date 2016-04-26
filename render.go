@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	defaultFramesPerSecond = 24
+	defaultFramesPerSecond = 3 // 24
 	defaultWaitTime        = 1000 / defaultFramesPerSecond
 )
 
