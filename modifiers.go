@@ -40,7 +40,7 @@ func (p *prop) Modify(element *Element) {
 		element.properties = make(map[string]interface{})
 	}
 	if _, ok := element.properties[p.name]; ok {
-		panic("Duplicate property" + p.name)
+		panic("Duplicate property: " + p.name)
 	}
 	element.properties[p.name] = p.value
 }
@@ -50,13 +50,27 @@ func Prop(name string, value interface{}) Modifier {
 }
 
 func (m cssClasses) Modify(element *Element) {
-	Prop("className", strings.Join(m, " ")).Modify(element)
+	if existing, ok := element.properties["className"]; ok {
+		//merge with existing
+		element.properties["className"] = existing.(string) + " " + strings.Join(m, " ")
+	} else {
+		Prop("className", strings.Join(m, " ")).Modify(element)
+	}
 }
 
 type style struct {
 	name  string
 	value interface{}
 }
+
+type discard int
+
+func (d discard) Modify(element *Element) {
+	// Do nothing!
+}
+
+// A Modifier that does nothing.
+var Discard = new(discard)
 
 func (s *style) Modify(element *Element) {
 	if element.style == nil {

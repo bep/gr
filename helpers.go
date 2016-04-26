@@ -1,6 +1,10 @@
 package gr
 
 import (
+	"fmt"
+
+	"strconv"
+
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -19,4 +23,50 @@ func UnmountComponentAtNode(elementID string) bool {
 	// TODO(bep) maybe incorporate this DOM element into the component
 	container := js.Global.Get("document").Call("getElementById", elementID)
 	return reactDOM.Call("unmountComponentAtNode", container).Bool()
+}
+
+type HostInfo struct {
+	Path     string
+	Port     int
+	Host     string
+	Href     string
+	Protocol string
+	Origin   string
+}
+
+// Location returns info about the current browser location.
+func Location() HostInfo {
+	l := js.Global.Get("window").Get("location").Interface().(map[string]interface{})
+	loc := HostInfo{
+		Path:     toString(l["pathname"]),
+		Port:     toInt(l["port"]),
+		Host:     toString(l["hostname"]),
+		Href:     toString(l["href"]),
+		Protocol: toString(l["protocol"]),
+		Origin:   toString(l["origin"])}
+
+	return loc
+}
+
+func toString(i interface{}) string {
+	return i.(string)
+}
+
+func toInt(i interface{}) int {
+	switch v := i.(type) {
+	case int:
+		return v
+	case float32:
+		return int(v)
+	case float64:
+		return int(v)
+	case string:
+		iv, err := strconv.ParseInt(v, 0, 0)
+		if err == nil {
+			return int(iv)
+		}
+		panic(err)
+	default:
+		panic(fmt.Sprintf("Unhandled number type: %T", v))
+	}
 }

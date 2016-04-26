@@ -2,6 +2,7 @@ package examples
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bep/gr"
 	"github.com/bep/gr/attr"
@@ -11,21 +12,43 @@ import (
 
 // Example is a wrapper for the examples
 func Example(title string, mods ...gr.Modifier) *gr.Element {
-	links := el.UnorderedList(
-		el.ListItem(el.Anchor(attr.HRef("../basic"), gr.Text("Basic"))),
-		el.ListItem(el.Anchor(attr.HRef("../basic-click-counter"), gr.Text("Basic Click-counter"))),
-		el.ListItem(el.Anchor(attr.HRef("../composition"), gr.Text("Component Composition"))),
-		el.ListItem(el.Anchor(attr.HRef("../lifecycle"), gr.Text("Lifecycle"))),
+
+	links := el.Div(gr.CSS("list-group"),
+		exampleListItem(title, "basic", "Basic"),
+		exampleListItem(title, "basic-click-counter", "Basic Click-counter"),
+		exampleListItem(title, "composition", "Component Composition"),
+		exampleListItem(title, "lifecycle", "Lifecycle"),
 	)
 
 	elem := el.Div(gr.CSS("panel", "panel-primary"),
 		el.Div(gr.CSS("panel-heading"), el.Header1(gr.Text(title))),
-		el.Div(append(mods, gr.CSS("panel-body"))...),
+		el.Div(append(mods, gr.CSS("panel-body"),
+			el.Header3(gr.Text("More examples")), links)...),
 		el.Div(gr.CSS("panel-footer"),
 			el.Div(
-				el.Emphasis(gr.Text("Go React Examples:")), links)))
+				el.Emphasis(gr.Text("Facebook React in Go")))))
 
 	return elem
+}
+
+func exampleListItem(title, href, text string) gr.Modifier {
+	var (
+		itemStatus gr.Modifier = gr.Discard
+		loc                    = gr.Location()
+	)
+
+	if !strings.HasSuffix(href, "/") {
+		href += "/"
+	}
+
+	if strings.HasSuffix(loc.Path, href) {
+		itemStatus = gr.CSS("active")
+	}
+
+	href = "../" + href
+
+	return el.Anchor(gr.CSS("list-group-item"), itemStatus, attr.HRef(href), gr.Text(text))
+
 }
 
 // Alert creates a Bootstrap alert element.
