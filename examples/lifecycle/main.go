@@ -53,7 +53,7 @@ func (l lifecycle) Render(this *gr.This) gr.Component {
 // Implements the StateInitializer interface.
 func (l lifecycle) GetInitialState(this *gr.This) gr.State {
 	println("GetInitialState")
-	return gr.State{"color": "blue"}
+	return gr.State{"color": "#ffcc00"}
 }
 
 // Implements the ShouldComponentUpdate interface
