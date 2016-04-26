@@ -177,7 +177,7 @@ func CrossOrigin(v string) gr.Modifier {
 
 // DangerouslySetInnerHTML Provides the ability to insert raw HTML, 
 // mainly for cooperating with DOM string manipulation libraries.
-func DangerouslySetInnerHTML(v string) gr.Modifier {
+func DangerouslySetInnerHTML(v interface{}) gr.Modifier {
 	return gr.Prop("dangerouslySetInnerHTML", v)
 }
 
@@ -345,7 +345,7 @@ func ItemProp(v string) gr.Modifier {
 // When your component shuffles around during render passes, it might be destroyed 
 // and recreated due to the diff algorithm. Assigning it a key that persists makes 
 // sure the component stays.
-func Key(v string) gr.Modifier {
+func Key(v interface{}) gr.Modifier {
 	return gr.Prop("key", v)
 }
 
@@ -520,7 +520,7 @@ func ReadOnly(v string) gr.Modifier {
 }
 
 // Ref adds an ref to a component, see http://facebook.github.io/react/docs/more-about-refs.html
-func Ref(v string) gr.Modifier {
+func Ref(v interface{}) gr.Modifier {
 	return gr.Prop("ref", v)
 }
 

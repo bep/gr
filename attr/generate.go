@@ -21,6 +21,12 @@ sure the component stays.`,
 mainly for cooperating with DOM string manipulation libraries.`,
 }
 
+var altType = map[string]string{
+	"key": "interface{}",
+	"ref": "interface{}",
+	"dangerouslySetInnerHTML": "interface{}",
+}
+
 func main() {
 	b, err := ioutil.ReadFile("htmlattributes.source.txt")
 	if err != nil {
@@ -57,17 +63,21 @@ import "github.com/bep/gr"
 		funcName := strings.Title(w)
 		funcName = replacements.Replace(funcName)
 		docString := fmt.Sprintf("%s creates an HTML attribute for '%s'.", funcName, w)
-
+		propType := "string"
 		if alt, ok := altDoc[w]; ok {
 			docString = strings.Replace(alt, "\n", "\n// ", -1)
 		}
 
+		if alt, ok := altType[w]; ok {
+			propType = alt
+		}
+
 		funcBody := fmt.Sprintf(`
 // %s
-func %s(v string) gr.Modifier {
+func %s(v %s) gr.Modifier {
 	return gr.Prop("%s", v)
 }
-`, docString, funcName, w)
+`, docString, funcName, propType, w)
 
 		fmt.Fprintf(file, "%s", funcBody)
 
