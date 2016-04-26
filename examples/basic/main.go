@@ -31,7 +31,9 @@ func (e elapser) Render(this *gr.This) gr.Component {
 	elapsed := this.Props()["elapsed"]
 	message := fmt.Sprintf("React has been successfully running for '%v' seconds.", elapsed)
 
-	return examples.Alert("success", el.Strong(gr.Text(message)))
+	elem := examples.Alert("info", el.Strong(gr.Text(message)))
+
+	return examples.Example("Basic", elem)
 }
 
 // Implements the ShouldComponentUpdate interface.
