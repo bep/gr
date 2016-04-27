@@ -16,8 +16,10 @@ type Component interface {
 	Node() *js.Object
 }
 
-// The root component.
-type Root struct {
+// ReactComponent wraps a Facebook React component.
+// This component can either be constructed from a Go implementation (see New) or
+// loaded from JavaScript (see FromJS).
+type ReactComponent struct {
 	// The React.createClass response.
 	node *js.Object
 
@@ -29,7 +31,7 @@ type Root struct {
 }
 
 // TODO(bep) investigate modules.
-func FromJS(path ...string) *Root {
+func FromJS(path ...string) *ReactComponent {
 
 	var component *js.Object
 
@@ -46,14 +48,14 @@ func FromJS(path ...string) *Root {
 	}
 
 	// TODO(bep): No concept of a Renderer implementation here. Do we need it?
-	return &Root{node: component}
+	return &ReactComponent{node: component}
 }
 
 // Export is an option used to mark that the component should be exported to the
 // JavaScript world as a global with the given name.
 // TODO(bep) Again, explore the world of JavaScript modules.
-func Export(name string) func(*Root) error {
-	return func(r *Root) error {
+func Export(name string) func(*ReactComponent) error {
+	return func(r *ReactComponent) error {
 		if name == "" {
 			return errors.New("Must provide export name")
 		}
@@ -62,8 +64,8 @@ func Export(name string) func(*Root) error {
 	}
 }
 
-func New(r Renderer, options ...func(*Root) error) *Root {
-	root := &Root{r: r}
+func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
+	root := &ReactComponent{r: r}
 
 	classProps := make(map[string]*js.Object)
 
@@ -122,24 +124,24 @@ func New(r Renderer, options ...func(*Root) error) *Root {
 	return root
 }
 
-func (r *Root) handleOptionsOnCreate() {
+func (r *ReactComponent) handleOptionsOnCreate() {
 	if r.exportName != "" {
 		js.Global.Set(r.exportName, r.node)
 	}
 }
 
 // Implements the Component interface.
-func (r *Root) Node() *js.Object {
+func (r *ReactComponent) Node() *js.Object {
 	return r.node
 }
 
 // TODO(bep) ...
-func (r *Root) CreateElement(props Props) *Element {
+func (r *ReactComponent) CreateElement(props Props) *Element {
 	elm := react.Call("createElement", r.node, props)
 	return &Element{element: elm}
 }
 
-func (r *Root) Render(elementID string, props Props) {
+func (r *ReactComponent) Render(elementID string, props Props) {
 	container := js.Global.Get("document").Call("getElementById", elementID)
 
 	elm := react.Call("createElement", r.node, props)
