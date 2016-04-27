@@ -11,31 +11,33 @@ import (
 
 func main() {
 	var (
-		start             = time.Now().Unix()
-		internalComponent = gr.New(new(elapser))
+		start = time.Now().Unix()
+
+		// Export it so it can be used from JavaScript.
+		internalComponent = gr.New(new(elapser), gr.Export("Elapser"))
 	)
 
 	gr.RenderLoop(func() {
-		props := gr.Props{"elapsed": (time.Now().Unix() - start)}
+		props := gr.Props{"title": "Interop from Go", "elapsed": (time.Now().Unix() - start)}
 		internalComponent.Render("react", props)
 	})
 }
 
 type elapser int
 
-var (
-	externalComponent = gr.FromJS("ElapserExt")
-)
+var externalComponent = gr.FromJS("ElapserExt")
 
 // Implements the Renderer interface.
 func (e elapser) Render(this *gr.This) gr.Component {
 	elapsed := this.Props()["elapsed"]
+	title := this.Props()["title"].(string) // TODO(bep cleanup props handling
+
 	message := fmt.Sprintf("Go Timer has been successfully running for %v seconds.", elapsed)
 
 	internalCounter := examples.Alert("info", el.Strong(gr.Text(message)))
 	externalCounter := examples.Alert("warning", externalComponent.CreateElement(this.Props()))
 
-	return examples.Example("Interop", internalCounter, externalCounter)
+	return examples.Example(title, internalCounter, externalCounter)
 }
 
 // Implements the ShouldComponentUpdate interface.

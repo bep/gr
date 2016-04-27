@@ -1,6 +1,7 @@
 package gr
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/gopherjs/gopherjs/js"
@@ -22,6 +23,9 @@ type Root struct {
 
 	// The minimum interface needed to display something.
 	r Renderer
+
+	// Options
+	exportName string
 }
 
 // TODO(bep) investigate modules.
@@ -45,7 +49,20 @@ func FromJS(path ...string) *Root {
 	return &Root{node: component}
 }
 
-func New(r Renderer) *Root {
+// Export is an option used to mark that the component should be exported to the
+// JavaScript world as a global with the given name.
+// TODO(bep) Again, explore the world of JavaScript modules.
+func Export(name string) func(*Root) error {
+	return func(r *Root) error {
+		if name == "" {
+			return errors.New("Must provide export name")
+		}
+		r.exportName = name
+		return nil
+	}
+}
+
+func New(r Renderer, options ...func(*Root) error) *Root {
 	root := &Root{r: r}
 
 	classProps := make(map[string]*js.Object)
@@ -90,9 +107,25 @@ func New(r Renderer) *Root {
 		classProps["componentWillUnmount"] = makeVoidFunc(v.ComponentWillUnmount)
 	}
 
-	root.node = react.Call("createClass", classProps)
+	class := react.Call("createClass", classProps)
+	root.node = react.Call("createFactory", class)
+
+	for _, opt := range options {
+		err := opt(root)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	root.handleOptionsOnCreate()
 
 	return root
+}
+
+func (r *Root) handleOptionsOnCreate() {
+	if r.exportName != "" {
+		js.Global.Set(r.exportName, r.node)
+	}
 }
 
 // Implements the Component interface.
