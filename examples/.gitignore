@@ -1,5 +1,8 @@
-**/*.js
-**/basic*
-**/lifecycle*
-**/composition*
-**/interop*
+
+
+# Avoid the binaries (there may be a better .gitignore pattern for this)
+**/basic/basic
+**/basic-click-counter/basic-click-counter
+**/lifecycle/lifecycle
+**/composition/composition
+**/interop/interop
