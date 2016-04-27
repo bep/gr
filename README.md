@@ -5,7 +5,7 @@
 
 ## Examples
 
-For a live demo of the examples below, see [http://bego.io/goreact/basic/](http://bego.io/goreact/basic/)  (may not be up-to-date).
+For a live demo of the examples below, see [http://bego.io/goreact/examples/basic/](http://bego.io/goreact/examples/basic/)  (may not be up-to-date).
 
 There are some runnable examples in `/examples`. Just navigate to that folder and do a:
 
