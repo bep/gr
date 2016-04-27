@@ -1,6 +1,8 @@
 package gr
 
 import (
+	"fmt"
+
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -20,6 +22,27 @@ type Root struct {
 
 	// The minimum interface needed to display something.
 	r Renderer
+}
+
+// TODO(bep) investigate modules.
+func FromJS(path ...string) *Root {
+
+	var component *js.Object
+
+	for _, p := range path {
+		if component != nil && component != js.Undefined {
+			component = component.Get(p)
+		} else {
+			component = js.Global.Get(p)
+		}
+	}
+
+	if component == nil || component == js.Undefined {
+		panic(fmt.Sprintf("JS component in path %v not found", path))
+	}
+
+	// TODO(bep): No concept of a Renderer implementation here. Do we need it?
+	return &Root{node: component}
 }
 
 func New(r Renderer) *Root {
