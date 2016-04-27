@@ -30,7 +30,7 @@ func FromJS(path ...string) *Root {
 	var component *js.Object
 
 	for _, p := range path {
-		if component != nil && component != js.Undefined {
+		if component != nil {
 			component = component.Get(p)
 		} else {
 			component = js.Global.Get(p)
