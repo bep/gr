@@ -98,15 +98,15 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	}
 
 	if v, ok := r.(ComponentWillMount); ok {
-		classProps["componentWillMount"] = makeVoidFunc(v.ComponentWillMount)
+		classProps["componentWillMount"] = makeVoidFunc(v.ComponentWillMount, true)
 	}
 
 	if v, ok := r.(ComponentDidMount); ok {
-		classProps["componentDidMount"] = makeVoidFunc(v.ComponentDidMount)
+		classProps["componentDidMount"] = makeVoidFunc(v.ComponentDidMount, true)
 	}
 
 	if v, ok := r.(ComponentWillUnmount); ok {
-		classProps["componentWillUnmount"] = makeVoidFunc(v.ComponentWillUnmount)
+		classProps["componentWillUnmount"] = makeVoidFunc(v.ComponentWillUnmount, true)
 	}
 
 	class := react.Call("createClass", classProps)
@@ -297,9 +297,15 @@ func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This,
 	return that, props, state
 }
 
-func makeVoidFunc(f func(this *This)) *js.Object {
+func makeVoidFunc(f func(this *This), assumeBlocking bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		f(makeThis(this))
+		if assumeBlocking {
+			go func() {
+				f(makeThis(this))
+			}()
+		} else {
+			f(makeThis(this))
+		}
 		return nil
 	})
 }
