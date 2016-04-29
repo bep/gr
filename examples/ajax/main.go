@@ -19,10 +19,6 @@ import (
 func main() {
 	component := gr.New(new(userGists))
 	component.Render("react", gr.Props{})
-
-	// block
-	w := make(chan struct{})
-	<-w
 }
 
 type gist struct {
@@ -37,6 +33,7 @@ type userGists int
 
 // Implements the Renderer interface.
 func (g userGists) Render(this *gr.This) gr.Component {
+	println("Render")
 
 	elem := el.Div()
 
