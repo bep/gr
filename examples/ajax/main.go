@@ -49,7 +49,8 @@ func (g userGists) Render(this *gr.This) gr.Component {
 		//
 		// Let that serve as a note to self that this may not be the optimal way.
 		// I imagine most of the UI will happen in JavaScript and the business logic
-		// and the orchestration, including injecting data reuired by the components.
+		// and here in Go "all" the orchestration, including injecting data required
+		// by the components.
 		gists := s.([]interface{})
 
 		table := el.Table(
