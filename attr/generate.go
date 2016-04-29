@@ -66,7 +66,7 @@ import "github.com/bep/gr"
 		funcName := strings.Title(w)
 		funcName = replacements.Replace(funcName)
 		docString := fmt.Sprintf("%s creates an HTML attribute for '%s'.", funcName, w)
-		propType := "string"
+		propType := "interface{}"
 		if alt, ok := altDoc[w]; ok {
 			docString = strings.Replace(alt, "\n", "\n// ", -1)
 		}
