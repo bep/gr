@@ -12,7 +12,8 @@ func (s *textEl) Modify(in *Element) {
 	in.text = s.text
 }
 
-func Text(text string) Modifier {
+func Text(i interface{}) Modifier {
+	text := toString(i)
 	return &textEl{text: text}
 }
 

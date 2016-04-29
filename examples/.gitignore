@@ -1,6 +1,7 @@
 
 
 # Avoid the binaries (there may be a better .gitignore pattern for this)
+**/ajax/ajax
 **/basic/basic
 **/basic-click-counter/basic-click-counter
 **/lifecycle/lifecycle

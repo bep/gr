@@ -19,6 +19,7 @@ func Example(title string, mods ...gr.Modifier) *gr.Element {
 		exampleListItem(title, "composition", "Component Composition"),
 		exampleListItem(title, "lifecycle", "Lifecycle"),
 		exampleListItem(title, "interop", "Interop"),
+		exampleListItem(title, "ajax", "Ajax"),
 	)
 
 	elem := el.Div(gr.CSS("panel", "panel-primary"),

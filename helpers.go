@@ -49,7 +49,17 @@ func Location() HostInfo {
 }
 
 func toString(i interface{}) string {
-	return i.(string)
+	switch v := i.(type) {
+	case string:
+		return i.(string)
+	case *js.Object:
+		if v == js.Undefined {
+			return ""
+		}
+		panic("Invalid string type")
+	}
+
+	return ""
 }
 
 func toInt(i interface{}) int {

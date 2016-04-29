@@ -34,5 +34,4 @@ func RenderLoop(render func(), interval ...time.Duration) chan struct{} {
 	}()
 
 	return quit
-
 }

@@ -3,6 +3,8 @@ package main
 import (
 	"time"
 
+	"log"
+
 	"github.com/bep/gr"
 	"github.com/bep/gr/el"
 	"github.com/bep/gr/examples"
@@ -42,7 +44,7 @@ type lifecycle int
 
 // Implements the Renderer interface.
 func (l lifecycle) Render(this *gr.This) gr.Component {
-	println("Render")
+	log.Println("Render")
 	elem := el.Div(el.Header2(
 		gr.Text("Look at the lifecycle events in your console."),
 		gr.Style("color", this.State()["color"])))
@@ -52,7 +54,7 @@ func (l lifecycle) Render(this *gr.This) gr.Component {
 
 // Implements the StateInitializer interface.
 func (l lifecycle) GetInitialState(this *gr.This) gr.State {
-	println("GetInitialState")
+	log.Println("GetInitialState")
 	return gr.State{"color": "#ffcc00"}
 }
 
@@ -63,30 +65,34 @@ func (l lifecycle) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, next
 
 // Implements the ComponentWillUpdate interface
 func (l lifecycle) ComponentWillUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) {
-	println("ComponentWillUpdate")
+	log.Println("ComponentWillUpdate")
 }
 
 // Implements the ComponentWillReceiveProps interface
 func (l lifecycle) ComponentWillReceiveProps(this *gr.This, p gr.Props) {
-	println("ComponentWillReceiveProps")
+	log.Println("ComponentWillReceiveProps")
 }
 
 // Implements the ComponentDidUpdate interface
 func (l lifecycle) ComponentDidUpdate(this *gr.This, props gr.Props, state gr.State) {
-	println("ComponentDidUpdate")
+	log.Println("ComponentDidUpdate")
 }
 
 // Implements the ComponentWillMount interface
 func (l lifecycle) ComponentWillMount(this *gr.This) {
-	println("ComponentWillMount")
+	log.Println("ComponentWillMount")
 }
 
 // Implements the ComponentDidMount interface
 func (l lifecycle) ComponentDidMount(this *gr.This) {
-	println("ComponentDidMount")
+	log.Println("ComponentDidMount")
 }
 
 // Implements the ComponentWillUnmount interface
 func (l lifecycle) ComponentWillUnmount(this *gr.This) {
-	println("ComponentWillUnmount")
+	log.Println("ComponentWillUnmount")
+}
+
+func init() {
+	log.SetFlags(log.Ltime | log.Lmicroseconds)
 }
