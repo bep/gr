@@ -23,6 +23,7 @@ var (
 	appComponent = gr.New(new(app), gr.Apply(grouter.WithRouter))
 
 	router = grouter.New("/", appComponent,
+		grouter.NewIndexRoute(grouter.Components{"main": component1}),
 		grouter.NewRoute("c1", grouter.Components{"main": component1}),
 		grouter.NewRoute("c2", grouter.Components{"main": component2}),
 		grouter.NewRoute("c3", grouter.Components{"main": component3, "sub": component3_2}),
