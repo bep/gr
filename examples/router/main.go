@@ -46,7 +46,6 @@ type app int
 
 // Implements the Renderer interface.
 func (a app) Render(this *gr.This) gr.Component {
-	// Receives the component as this.props.route.component
 	return el.Div(
 		el.Header1(gr.Text("Router")),
 		el.UnorderedList(
@@ -55,6 +54,9 @@ func (a app) Render(this *gr.This) gr.Component {
 			createLinkListItem(this, "/c2", "Tab #2"),
 			createLinkListItem(this, "/c3", "Tab #3"),
 		),
+		// Receives the component in this.props.<name>
+		// If none found, a no-op is returned.
+		// TODO(bep) default if none found.
 		this.Component("main"),
 		this.Component("sub"),
 	)
