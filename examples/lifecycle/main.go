@@ -10,7 +10,7 @@ import (
 	"github.com/bep/gr/examples"
 )
 
-// Simple example demonstrating the avilable lifecycle hooks.
+// Simple example demonstrating the available lifecycle hooks.
 // See also https://facebook.github.io/react/docs/component-specs.html
 
 func main() {
