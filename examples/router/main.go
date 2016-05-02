@@ -41,11 +41,6 @@ func (r testRouter) Render(this *gr.This) gr.Component {
 	return router
 }
 
-// Implements the ShouldComponentUpdate interface.
-func (r testRouter) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
-	return true
-}
-
 type app int
 
 // Implements the Renderer interface.
