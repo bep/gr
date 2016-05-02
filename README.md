@@ -1,4 +1,7 @@
 # Go React
+
+[![GoDoc](https://godoc.org/github.com/bep/greact?status.svg)](https://godoc.org/github.com/bep/greact)
+		
 [GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
 
 **NOTE: Still very early and not production ready.**
