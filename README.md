@@ -1,6 +1,6 @@
 # Go React
 
-[![GoDoc](https://godoc.org/github.com/bep/greact?status.svg)](https://godoc.org/github.com/bep/greact)
+[![GoDoc](https://godoc.org/github.com/bep/gr?status.svg)](https://godoc.org/github.com/bep/gr)
 		
 [GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
 
