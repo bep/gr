@@ -60,6 +60,12 @@ func (e clickCounter) ShouldComponentUpdate(
 
 For help installing GopherJS, please visit [that cool project](https://github.com/gopherjs/gopherjs).
 
+## External Components
+
+Components living outside of this repository:
+
+* [grouter: react-router bindings](https://github.com/bep/grouter)
+
 ## Inspiration
 
 This project is highly inspired by [Vecty](https://github.com/gopherjs/vecty), a *promising and pure* Go React-like framework. If you're not heavily invested in Facebook's React, take that for a spin.

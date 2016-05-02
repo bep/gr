@@ -18,6 +18,20 @@ func (i *incrementor) next() int {
 	return i.counter
 }
 
+type elementFactory func(e *Element) *js.Object
+
+var defaultElementFactory = (*Element).createElement
+
+var buildOnceFactory = func(o *js.Object) elementFactory {
+	return func(e *Element) *js.Object {
+		if e.element != nil {
+			return e.element
+		}
+		e.element = o
+		return e.element
+	}
+}
+
 type Element struct {
 	tag            string
 	properties     map[string]interface{}
@@ -28,6 +42,8 @@ type Element struct {
 	text     string
 	children []Component
 
+	elFactory elementFactory
+
 	// This is the actual ReactJS element.
 	// ReactElement, ReactText or a ReactFragment
 	element *js.Object
@@ -36,16 +52,16 @@ type Element struct {
 }
 
 func NewElement(tag string) *Element {
-	return &Element{tag: tag}
+	return &Element{tag: tag, properties: Props{}, elFactory: defaultElementFactory}
+}
+
+// Create an Element from a ready-to-use React element.
+func NewPreparedElement(o *js.Object) *Element {
+	return &Element{elFactory: buildOnceFactory(o)}
 }
 
 func (e *Element) Node() *js.Object {
-	if e.element == nil {
-		// TODO(bep) check reusability
-		e.element = e.createElement()
-
-	}
-
+	e.element = e.elFactory(e)
 	return e.element
 }
 
@@ -95,5 +111,6 @@ func createElement(tag string, props map[string]interface{}, children ...interfa
 	if len(children) == 0 {
 		return react.Call("createElement", tag, props)
 	}
+
 	return react.Call("createElement", tag, props, children)
 }

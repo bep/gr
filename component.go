@@ -64,49 +64,56 @@ func Export(name string) func(*ReactComponent) error {
 	}
 }
 
+// Apply the func to the newly created React component.
+func Apply(f func(o *js.Object) *js.Object) func(*ReactComponent) error {
+	return func(r *ReactComponent) error {
+		r.node = f(r.node)
+		return nil
+	}
+}
+
 func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	root := &ReactComponent{r: r}
 
-	classProps := make(map[string]*js.Object)
-
+	classProps := js.Global.Get("Object").New()
 	// Every component needs to render itself.
-	classProps["render"] = makeRenderFunc(r.Render)
+	classProps.Set("render", makeRenderFunc(r.Render))
 
 	// Optional lifecycle implementations below.
 	if v, ok := r.(StateInitializer); ok {
-		classProps["getInitialState"] = makeStateFunc(v.GetInitialState)
+		classProps.Set("getInitialState", makeStateFunc(v.GetInitialState))
 	}
 
 	if v, ok := r.(ShouldComponentUpdate); ok {
-		classProps["shouldComponentUpdate"] = makeComponentUpdateFunc(v.ShouldComponentUpdate)
+		classProps.Set("shouldComponentUpdate", makeComponentUpdateFunc(v.ShouldComponentUpdate))
 	}
 
 	if v, ok := r.(ComponentWillUpdate); ok {
-		classProps["componentWillUpdate"] = makeComponentUpdateVoidFunc(v.ComponentWillUpdate)
+		classProps.Set("componentWillUpdate", makeComponentUpdateVoidFunc(v.ComponentWillUpdate))
 	}
 
 	if v, ok := r.(ComponentDidUpdate); ok {
-		classProps["componentDidUpdate"] = makeComponentUpdateVoidFunc(v.ComponentDidUpdate)
+		classProps.Set("componentDidUpdate", makeComponentUpdateVoidFunc(v.ComponentDidUpdate))
 	}
 
 	if v, ok := r.(ComponentWillReceiveProps); ok {
-		classProps["componentWillReceiveProps"] = makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps)
+		classProps.Set("componentWillReceiveProps", makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps))
 	}
 
 	if v, ok := r.(ShouldComponentUpdate); ok {
-		classProps["shouldComponentUpdate"] = makeComponentUpdateFunc(v.ShouldComponentUpdate)
+		classProps.Set("shouldComponentUpdate", makeComponentUpdateFunc(v.ShouldComponentUpdate))
 	}
 
 	if v, ok := r.(ComponentWillMount); ok {
-		classProps["componentWillMount"] = makeVoidFunc(v.ComponentWillMount, true)
+		classProps.Set("componentWillMount", makeVoidFunc(v.ComponentWillMount, true))
 	}
 
 	if v, ok := r.(ComponentDidMount); ok {
-		classProps["componentDidMount"] = makeVoidFunc(v.ComponentDidMount, true)
+		classProps.Set("componentDidMount", makeVoidFunc(v.ComponentDidMount, true))
 	}
 
 	if v, ok := r.(ComponentWillUnmount); ok {
-		classProps["componentWillUnmount"] = makeVoidFunc(v.ComponentWillUnmount, true)
+		classProps.Set("componentWillUnmount", makeVoidFunc(v.ComponentWillUnmount, true))
 	}
 
 	class := react.Call("createClass", classProps)
@@ -137,69 +144,15 @@ func (r *ReactComponent) Node() *js.Object {
 
 // TODO(bep) ...
 func (r *ReactComponent) CreateElement(props Props) *Element {
-	elm := react.Call("createElement", r.node, props)
-	return &Element{element: elm}
+	elm := react.Call("createElement", r.Node(), props)
+	return NewPreparedElement(elm)
 }
 
 func (r *ReactComponent) Render(elementID string, props Props) {
 	container := js.Global.Get("document").Call("getElementById", elementID)
-
-	elm := react.Call("createElement", r.node, props)
+	elm := react.Call("createElement", r.Node(), props)
 	// TODO(bep) evaluate if the need the "this" returned on render.
 	reactDOM.Call("render", elm, container)
-}
-
-type Props map[string]interface{}
-type State map[string]interface{}
-
-// HasChanged reports whether the value of the property with any of the given keys has changed.
-func (p Props) HasChanged(nextProps Props, keys ...string) bool {
-	return hasChanged(p, nextProps, keys...)
-}
-
-// HasChanged reports whether the value of the state with any of the given keys has changed.
-func (s State) HasChanged(nextState State, keys ...string) bool {
-	return hasChanged(s, nextState, keys...)
-}
-
-func hasChanged(m1, m2 map[string]interface{}, keys ...string) bool {
-	for _, key := range keys {
-		if m1[key] != m2[key] {
-			return true
-		}
-	}
-	return false
-}
-
-type This struct {
-	this *js.Object
-}
-
-func (t *This) Props() Props {
-	props := t.this.Get("props").Interface()
-	if props == nil {
-		return Props{}
-	}
-	return props.(map[string]interface{})
-}
-
-func (t *This) State() State {
-	state := t.this.Get("state").Interface()
-	if state == nil {
-		return State{}
-	}
-	return state.(map[string]interface{})
-}
-
-func (t *This) StateInt(key string) int {
-	if val, ok := t.State()[key]; ok {
-		return int(val.(float64))
-	}
-	return 0
-}
-
-func (t *This) SetState(s State) {
-	t.this.Call("setState", s)
 }
 
 // Lifecycle interfaces
@@ -320,6 +273,7 @@ func makeRenderFunc(f func(this *This) Component) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		that := makeThis(this)
 		comp := f(that)
+
 		idFactory := &incrementor{}
 		addMissingKeys(comp, idFactory)
 		// TODO(bep) refactor
@@ -351,6 +305,7 @@ func addEventListeners(c Component, that *This) {
 }
 
 func addMissingKeys(c Component, id *incrementor) {
+
 	if e, ok := c.(*Element); ok {
 		if e.properties == nil {
 			e.properties = make(map[string]interface{})
@@ -362,8 +317,4 @@ func addMissingKeys(c Component, id *incrementor) {
 			addMissingKeys(c2, id)
 		}
 	}
-}
-
-func makeThis(that *js.Object) *This {
-	return &This{this: that}
 }
