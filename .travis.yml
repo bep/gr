@@ -1,20 +1,32 @@
 sudo: false
 language: go
 
-go:
-  - 1.6.2
+env:
+  - SOURCE_MAP_SUPPORT=false TRAVIS_NODE_VERSION="5.1" CXX="g++-4.8"
 
+go:
+  - 1.6.2  
+  
 install:
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
+  - node -v
   - go get -u github.com/gopherjs/gopherjs
   - npm install
   - npm install --global node-gyp
-  - cd node-syscall && node-gyp rebuild && mkdir -p ~/.node_libraries/ && cp build/Release/syscall.node ~/.node_libraries/syscall.node
+  - pushd $HOME/gopath/src/github.com/gopherjs/gopherjs/node-syscall && node-gyp rebuild && mkdir -p ~/.node_libraries/ && cp build/Release/syscall.node ~/.node_libraries/syscall.node && popd
 
 script:
   - gopherjs test github.com/bep/gr/tests
 
 os:
   - linux
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-4.8
 
 notifications:
   email: false
