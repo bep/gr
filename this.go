@@ -44,14 +44,6 @@ func (t *This) Component(name string) Modifier {
 	return Discard
 }
 
-func (t *This) _Props() Props {
-	props := t.this.Get("props").Interface()
-	if props == nil {
-		return Props{}
-	}
-	return props.(map[string]interface{})
-}
-
 func (t *This) State() State {
 	state := t.this.Get("state").Interface()
 	if state == nil {
@@ -60,8 +52,8 @@ func (t *This) State() State {
 	return state.(map[string]interface{})
 }
 
-func (t *This) StateInt(key string) int {
-	if val, ok := t.State()[key]; ok {
+func (s State) Int(key string) int {
+	if val, ok := s[key]; ok {
 		return int(val.(float64))
 	}
 	return 0

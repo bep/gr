@@ -21,6 +21,7 @@ func Example(title string, mods ...gr.Modifier) *gr.Element {
 		exampleListItem(title, "interop", "Interop"),
 		exampleListItem(title, "ajax", "Ajax"),
 		exampleListItem(title, "router", "React Router"),
+		exampleListItem(title, "debounce", "Debounced Mouse Events"),
 	)
 
 	elem := el.Div(gr.CSS("panel", "panel-primary"),
@@ -60,9 +61,9 @@ func exampleListItem(title, href, text string) gr.Modifier {
 func Alert(classifier string, body gr.Modifier) *gr.Element {
 	e := el.Div(
 		gr.CSS("alert", "alert-"+classifier),
-		el.Anchor(attr.HRef("#"),
-			gr.CSS("close"), gr.Data("dismiss", "alert"), gr.Aria("label", "close"),
-			gr.Text("Close")),
+		//el.Anchor(attr.HRef("#"),
+		//	gr.CSS("close"), gr.Data("dismiss", "alert"), gr.Aria("label", "close"),
+		//	gr.Text("Close")),
 		body)
 	return e
 }
@@ -89,7 +90,7 @@ func (c ClickCounter) Render(this *gr.This) gr.Component {
 }
 
 func (c ClickCounter) onClick(this *gr.This, event *gr.Event) {
-	this.SetState(gr.State{"counter": this.StateInt("counter") + 1})
+	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
 }
 
 func (c ClickCounter) ShouldComponentUpdate(

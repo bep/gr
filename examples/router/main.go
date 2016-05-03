@@ -91,7 +91,7 @@ func (c clickCounter) Render(this *gr.This) gr.Component {
 }
 
 func (c clickCounter) onClick(this *gr.This, event *gr.Event) {
-	this.SetState(gr.State{"counter": this.StateInt("counter") + 1})
+	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
 }
 
 // Implements the ShouldComponentUpdate interface.

@@ -5,12 +5,21 @@ import (
 )
 
 type Event struct {
-	target *js.Object
+	*js.Object
+}
+
+func (e *Event) Persist() {
+	e.Call("persist")
+}
+
+func (e *Event) Int(key string) int {
+	return e.Get(key).Int()
 }
 
 type EventListener struct {
-	name           string
-	listener       func(*This, *Event)
+	name     string
+	listener func(*This, *Event)
+	// TODO(bep) prevent...
 	preventDefault bool
 	delegate       func(jsEvent *js.Object)
 }
