@@ -1,6 +1,6 @@
 # Go React
 
-[![Build Status](https://travis-ci.org/bep/gr)](https://travis-ci.org/bep/gr)
+[![Build Status](https://travis-ci.org/bep/gr.svg)](https://travis-ci.org/bep/gr)
 [![GoDoc](https://godoc.org/github.com/bep/gr?status.svg)](https://godoc.org/github.com/bep/gr)
 		
 [GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
