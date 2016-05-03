@@ -31,15 +31,8 @@ var (
 )
 
 func main() {
-	mainComponent := gr.New(new(testRouter))
+	mainComponent := gr.New(gr.NewSimpleRenderer(router))
 	mainComponent.Render("react", gr.Props{})
-}
-
-type testRouter int
-
-// Implements the Renderer interface.
-func (r testRouter) Render(this *gr.This) gr.Component {
-	return router
 }
 
 type app int

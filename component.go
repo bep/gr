@@ -72,6 +72,21 @@ func Apply(f func(o *js.Object) *js.Object) func(*ReactComponent) error {
 	}
 }
 
+// NewSimpleRenderer can be used for quickly putting together components that only
+// need to implement Renderer with no need of the owner (this) argument.
+func NewSimpleRenderer(c Component) Renderer {
+	return simpleRenderer{c}
+}
+
+type simpleRenderer struct {
+	c Component
+}
+
+// Implements the Renderer interface.
+func (s simpleRenderer) Render(this *This) Component {
+	return s.c
+}
+
 func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	root := &ReactComponent{r: r}
 
