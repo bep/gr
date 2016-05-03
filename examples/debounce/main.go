@@ -72,7 +72,6 @@ func debounceMouseListener() gr.Listener {
 		// Note the browser compatibility notes.
 		clientX := e.Int("screenX")
 		clientY := e.Int("screenY")
-		e.Persist()
 
 		f := func() {
 			println(e)
