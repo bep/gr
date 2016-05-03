@@ -1,0 +1,20 @@
+sudo: false
+language: go
+
+go:
+  - 1.6.2
+
+before_script:
+  - go get -u github.com/gopherjs/gopherjs
+  - npm install
+  - npm install --global node-gyp
+  - cd node-syscall && node-gyp rebuild && mkdir -p ~/.node_libraries/ && cp build/Release/syscall.node ~/.node_libraries/syscall.node
+
+script:
+  - gopherjs test github.com/bep/gr/tests
+
+os:
+  - linux
+
+notifications:
+  email: false
