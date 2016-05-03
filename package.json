@@ -1,0 +1,34 @@
+{
+  "name": "gr",
+  "version": "0.0.1",
+  "description": "Facebook React bindings for Go",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "tests"
+  },
+  "dependencies": {
+    "react-dom": "^15.0.2",
+    "react": "^15.0.2"
+  },
+  "devDependencies": {
+    "react-addons-test-utils": "^15.0.2",
+    "skin-deep": "^0.16.0"
+  },
+  "scripts": {
+    "test": "gopherjs test github.com/bep/gr/tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bep/gr.git"
+  },
+  "keywords": [
+    "GopherJS"
+  ],
+  "author": "Bjørn Erik Pedersen <bjorn.erik.pedersen@gmail.com>",
+  "license": "TBA",
+  "bugs": {
+    "url": "https://github.com/bep/gr/issues"
+  },
+  "homepage": "https://github.com/bep/gr#README.md"
+}
