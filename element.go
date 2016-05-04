@@ -20,17 +20,12 @@ func (i *incrementor) next() int {
 
 type elementFactory func(e *Element) *js.Object
 
-var defaultElementFactory = (*Element).createElement
-
-var buildOnceFactory = func(o *js.Object) elementFactory {
-	return func(e *Element) *js.Object {
-		if e.element != nil {
-			return e.element
-		}
-		e.element = o
+var (
+	defaultElementFactory = (*Element).createElement
+	returnStoredElement   = func(e *Element) *js.Object {
 		return e.element
 	}
-}
+)
 
 type Element struct {
 	tag            string
@@ -57,7 +52,7 @@ func NewElement(tag string) *Element {
 
 // Create an Element from a ready-to-use React element.
 func NewPreparedElement(o *js.Object) *Element {
-	return &Element{elFactory: buildOnceFactory(o)}
+	return &Element{element: o, elFactory: returnStoredElement}
 }
 
 func (e *Element) Node() *js.Object {

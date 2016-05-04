@@ -12,8 +12,21 @@ var (
 	reactDOM = js.Global.Get("ReactDOM")
 )
 
+// A Component represents a React JS component.
+//
+// http://facebook.github.io/react/docs/glossary.html#react-nodes for a reference.
+//
+// A Component can be either a constructed element (analogous to a ReactElement)
+// or a factory (a ReactClass or a ReactFactory). Factories are identified by their
+// implementation of the Factory interface.
 type Component interface {
 	Node() *js.Object
+}
+
+// A Factory is a Component that can construct Elements (analogous to a ReactClass or a ReactFactory).
+type Factory interface {
+	Component
+	Create(props Props) *Element
 }
 
 // ReactComponent wraps a Facebook React component.
@@ -30,6 +43,7 @@ type ReactComponent struct {
 	exportName string
 }
 
+// FromJS loads a React component from the JavaScript side of the fence.
 // TODO(bep) investigate modules.
 func FromJS(path ...string) *ReactComponent {
 
@@ -94,6 +108,9 @@ func NewSimpleComponent(c Component, options ...func(*ReactComponent) error) *Re
 	return New(NewSimpleRenderer(c), options...)
 }
 
+// New creates a new Component given a Renderer and optinal option(s).
+// Note that the Renderer is the minimum interface that needs to be implemented,
+// but New will perform interface upgrades for other lifecycle interfaces.
 func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	root := &ReactComponent{r: r}
 
@@ -153,28 +170,39 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	return root
 }
 
-func (r *ReactComponent) handleOptionsOnCreate() {
-	if r.exportName != "" {
-		js.Global.Set(r.exportName, r.node)
+// CreateIfNeeded evaluates the given Component and returns an Element, creating
+// a new instance if needed. This is a convenience method; if you need to pass
+// properties, use the factory directly.
+func CreateIfNeeded(c Component) *Element {
+	switch v := c.(type) {
+	case *Element:
+		return v
+	case Factory:
+		return v.Create(nil)
+	default:
+		return NewPreparedElement(c.Node())
 	}
 }
 
-// Implements the Component interface.
+// Node implements the Component interface.
 func (r *ReactComponent) Node() *js.Object {
 	return r.node
 }
 
-// TODO(bep) ...
-func (r *ReactComponent) CreateElement(props Props) *Element {
+// Create implements the Factory interface.
+func (r *ReactComponent) Create(props Props) *Element {
 	elm := react.Call("createElement", r.Node(), props)
-	return NewPreparedElement(elm)
+	e := NewPreparedElement(elm)
+	return e
 }
 
+// Render the Component in the DOM with the given element ID and props.
 func (r *ReactComponent) Render(elementID string, props Props) {
 	container := js.Global.Get("document").Call("getElementById", elementID)
-	elm := react.Call("createElement", r.Node(), props)
+	elem := r.Create(props)
+
 	// TODO(bep) evaluate if the need the "this" returned on render.
-	reactDOM.Call("render", elm, container)
+	reactDOM.Call("render", elem.Node(), container)
 }
 
 // Lifecycle interfaces
@@ -183,7 +211,7 @@ func (r *ReactComponent) Render(elementID string, props Props) {
 
 // TODO(bep) Consider some better names. Move to subpackage?
 
-// Renderer is the core interface used to ... render a Component.
+// Renderer is the core interface used to render a Element.
 type Renderer interface {
 	Render(this *This) Component
 }
@@ -193,41 +221,41 @@ type StateInitializer interface {
 	GetInitialState(this *This) State
 }
 
-// Invoked before rendering when new props or state are being received.
+// ShouldComponentUpdate gets invoked before rendering when new props or state are being received.
 // This is not called for the initial render or when forceUpdate is used.
 type ShouldComponentUpdate interface {
 	ShouldComponentUpdate(this *This, nextProps Props, nextState State) bool
 }
 
-// Invoked immediately before rendering when new props or state are being received.
+// ComponentWillUpdate gets invoked immediately before rendering when new props or state are being received.
 // This is not called for the initial render.
 type ComponentWillUpdate interface {
 	ComponentWillUpdate(this *This, nextProps Props, nextState State)
 }
 
-// Invoked when a component is receiving new props.
+// ComponentWillReceiveProps gets invoked when a component is receiving new props.
 // This method is not called for the initial render.
 type ComponentWillReceiveProps interface {
 	ComponentWillReceiveProps(this *This, props Props)
 }
 
-// Invoked immediately after the component's updates are flushed to the DOM.
+// ComponentDidUpdate gets invoked immediately after the component's updates are flushed to the DOM.
 // This method is not called for the initial render.
 type ComponentDidUpdate interface {
 	ComponentDidUpdate(this *This, prevProps Props, prevState State)
 }
 
-// Invoked once, both on the client and server, immediately before the initial rendering occurs.
+// ComponentWillMount get invoked once, both on the client and server, immediately before the initial rendering occurs.
 type ComponentWillMount interface {
 	ComponentWillMount(this *This)
 }
 
-// Invoked immediately before a component is unmounted from the DOM.
+// ComponentWillUnmount gets invoked immediately before a component is unmounted from the DOM.
 type ComponentWillUnmount interface {
 	ComponentWillUnmount(this *This)
 }
 
-// Invoked once, only on the client (not on the server),
+// ComponentDidMount gets invoked once, only on the client (not on the server),
 // immediately after the initial rendering occurs.
 type ComponentDidMount interface {
 	ComponentDidMount(this *This)
@@ -303,6 +331,9 @@ func makeRenderFunc(f func(this *This) Component) *js.Object {
 			e.This = that
 			addEventListeners(comp, that)
 		}
+		if _, ok := comp.(Factory); ok {
+			panic("Render should return a ready-to-use Element.")
+		}
 		return comp.Node()
 	})
 }
@@ -323,6 +354,12 @@ func addEventListeners(c Component, that *This) {
 		for _, child := range e.children {
 			addEventListeners(child, that)
 		}
+	}
+}
+
+func (r *ReactComponent) handleOptionsOnCreate() {
+	if r.exportName != "" {
+		js.Global.Set(r.exportName, r.node)
 	}
 }
 

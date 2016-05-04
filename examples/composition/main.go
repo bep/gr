@@ -34,7 +34,7 @@ func (e elapser) Render(this *gr.This) gr.Component {
 	message := fmt.Sprintf("React has been successfully running for '%v' seconds.", elapsed)
 	elem := el.Div(
 		examples.Alert("info", el.Strong(gr.Text(message))),
-		clickCounter.CreateElement(nil),
+		clickCounter.Create(nil),
 	)
 
 	return examples.Example("Component Composition", elem)
