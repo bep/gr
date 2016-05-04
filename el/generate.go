@@ -93,7 +93,7 @@ func main() {
 
 	fmt.Fprint(file, `//go:generate go run generate.go
 
-// Package elements defines markup to create DOM elements.
+// Package el defines markup to create DOM elements.
 //
 // Generated from "HTML element reference" by Mozilla Contributors, https://developer.mozilla.org/en-US/docs/Web/HTML/Element, licensed under CC-BY-SA 2.5.
 package el
@@ -142,9 +142,9 @@ func writeElem(w io.Writer, name, desc, link string) {
 	if funName == "" {
 		funName = capitalize(name)
 	}
-
+	//TODO(bep) Make nicer description.
 	fmt.Fprintf(w, `
-// %s
+// %s — %s
 //
 // https://developer.mozilla.org%s
 func %s(mods ...gr.Modifier) *gr.Element {
@@ -152,7 +152,7 @@ func %s(mods ...gr.Modifier) *gr.Element {
 	gr.Modifiers(mods).Modify(e)
 	return e
 }
-`, desc, link, funName, name)
+`, funName, desc, link, funName, name)
 }
 
 func capitalize(s string) string {
