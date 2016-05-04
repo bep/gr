@@ -87,6 +87,13 @@ func (s simpleRenderer) Render(this *This) Component {
 	return s.c
 }
 
+// NewSimpleComponent can be used for quickly putting together components that only
+// need to implement Renderer with no need of the owner (this) argument.
+// Especially convenient for testing.
+func NewSimpleComponent(c Component, options ...func(*ReactComponent) error) *ReactComponent {
+	return New(NewSimpleRenderer(c), options...)
+}
+
 func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	root := &ReactComponent{r: r}
 

@@ -25,8 +25,8 @@ func Fail(t *testing.T, args ...interface{}) {
 	t.Fatal(args)
 }
 
-func Shallow(e *gr.Element) *RenderedTree {
-	tree := sd.Call("shallowRender", e.Node())
+func Shallow(c gr.Component) *RenderedTree {
+	tree := sd.Call("shallowRender", c.Node())
 	return &RenderedTree{Object: tree}
 }
 
@@ -49,12 +49,18 @@ type RenderedTree struct {
 	//findComponentLike: [Function],
 	GetRenderOutput func() map[string]interface{} `js:"getRenderOutput"`
 	String          func() string                 `js:"toString"`
-	Props           map[string]interface{}        `js:"props"`
+	Props           Props                         `js:"props"`
 	Type            string                        `js:"type"`
 }
 
+type Props map[string]interface{}
+
 type Matcher struct {
 	key, value string
+}
+
+func (p Props) CallEventListener(name string, args ...interface{}) *js.Object {
+	return p[name].(func(...interface{}) *js.Object)(name, args)
 }
 
 func NewMatcher(key, value string) Matcher {
@@ -64,9 +70,11 @@ func NewMatcher(key, value string) Matcher {
 func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
 
 	m := make(map[string]interface{})
+
 	for _, matcher := range matchers {
 		m[matcher.key] = matcher.value
 	}
+
 	var args []interface{} = []interface{}{selector}
 
 	if len(m) > 0 {
