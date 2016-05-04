@@ -45,7 +45,7 @@ func (m mouseTracker) Render(this *gr.This) gr.Component {
 		el.Paragraph(el.Anchor(
 			attr.HRef("https://davidwalsh.name/javascript-debounce-function"),
 			gr.Text("Debounce Function Explained"))),
-		evt.MouseMove(debounceMouseListener()),
+		evt.MouseMove(debounceMouseListener),
 	)
 
 	return examples.Example("Debounce", elem)
@@ -60,12 +60,10 @@ func (m mouseTracker) ShouldComponentUpdate(
 	return this.State().HasChanged(nextState, "mouseX", "mouseY")
 }
 
-// Only update the UI when no new events have been received for >= 200 ms.
-var debouncer, _ = debounce.New(200 * time.Millisecond)
-
-func debounceMouseListener() gr.Listener {
-
-	deb := func(this *gr.This, e *gr.Event) {
+var (
+	// Only update the UI when no new events have been received for >= 200 ms.
+	debouncer, _                      = debounce.New(200 * time.Millisecond)
+	debounceMouseListener gr.Listener = func(this *gr.This, e *gr.Event) {
 
 		// React recycles events - so extract early.
 		// For the mouse API, see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
@@ -80,8 +78,6 @@ func debounceMouseListener() gr.Listener {
 		}
 
 		debouncer(f)
+
 	}
-
-	return deb
-
-}
+)
