@@ -11,6 +11,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/PuerkitoBio/goquery"
 )
@@ -176,16 +177,22 @@ import "github.com/bep/gr"
 	for _, name := range names {
 		e := events[name]
 		fmt.Fprintf(file, `
-// %s
+// %s gets notified when %s
 //
 // https://developer.mozilla.org%s
 func %s(listener gr.Listener) *gr.EventListener {
 	return gr.NewEventListener("on%s", listener)
 }
-`, e.Desc, e.Link[6:], name, name)
+`, name, firstToLower(e.Desc), e.Link[6:], name, name)
 	}
 }
 
 func capitalize(s string) string {
 	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+func firstToLower(s string) string {
+	a := []rune(s)
+	a[0] = unicode.ToLower(a[0])
+	return string(a)
 }
