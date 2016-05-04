@@ -77,6 +77,7 @@ func (s *style) Modify(element *Element) {
 	if element.style == nil {
 		element.style = make(map[string]interface{})
 	}
+	// last style with a given name wins
 	element.style[s.name] = s.value
 }
 
