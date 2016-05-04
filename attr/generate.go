@@ -53,7 +53,6 @@ func main() {
 // Created from "HTML Attributes" as defined by Facebook in
 // - https://facebook.github.io/react/docs/tags-and-attributes.html
 // - http://facebook.github.io/react/docs/special-non-dom-attributes.html
-
 package attr
 
 import "github.com/bep/gr"
