@@ -24,10 +24,11 @@ func TestClickableButton(t *testing.T) {
 	component := gr.NewSimpleComponent(button)
 	tree := grt.Shallow(component)
 
-	tree.Props.CallEventListener("onClick")
-	tree.Props.CallEventListener("onClick")
+	for i := 0; i < 42; i++ {
+		tree.Props.CallEventListener("onClick")
+	}
 
 	grt.Equal(t, "<button>Clickable Button</button>", tree.String())
-	grt.Equal(t, 2, clickCount)
+	grt.Equal(t, 42, clickCount)
 
 }
