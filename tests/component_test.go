@@ -48,23 +48,30 @@ func TestNew(t *testing.T) {
 	grt.Equal(t, "blue", this.State()["color"])
 
 	// Rerender with new props
-	r.ReRender(gr.Props{"text": "Updated Button"})
+	newProps := gr.Props{"text": "Updated Button"}
+	r.ReRender(newProps)
 
 	grt.Equal(t, `<div><button style={{"color": "blue"}}>Updated Button</button></div>`,
 		r.String())
+
+	// Try to rerender with same props. No rerender should happen.
+	// Will trigger:
+	// 1) ComponentWillReceiveProps
+	// 2) ShouldComponentUpdate
+	r.ReRender(newProps)
 
 	time.Sleep(200 * time.Millisecond)
 
 	// TODO(bep) Verify that this is the expected behavior in this case.
 	// TODO(bep) Find a way to check the other methods.
-	grt.Equal(t, 7, component.visitCounter)
+	grt.Equal(t, 9, component.visitCounter)
 
 }
 
 func TestNewWithExport(t *testing.T) {
 	defer resetComponentState()
 
-	component := createLifecycler()
+	var component gr.Lifecycler = createLifecycler()
 
 	gr.New(component, gr.Export(exportedTestComponent))
 
@@ -135,7 +142,7 @@ func (l *testLifecycler) GetInitialState(this *gr.This) gr.State {
 func (l *testLifecycler) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
 	l.visited()
 	println("ShouldComponentUpdate")
-	return true
+	return this.Props().HasChanged(nextProps, "text")
 }
 func (l *testLifecycler) ComponentWillUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) {
 	l.visited()
