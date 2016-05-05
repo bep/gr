@@ -3,6 +3,7 @@ package grt
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/bep/gr"
@@ -11,6 +12,7 @@ import (
 
 func Equal(t *testing.T, expected, actual interface{}) {
 	if expected != actual {
+		// TODO(bep) figure a way to get caller info
 		t.Errorf("Assert mismatch:\n%v\n%v", expected, actual)
 	}
 }
@@ -25,18 +27,22 @@ func Fail(t *testing.T, args ...interface{}) {
 	t.Fatal(args)
 }
 
-func Shallow(c gr.Component) *RenderedTree {
+func ShallowRender(c gr.Component) *RenderedTree {
 	tree := sd.Call("shallowRender", c.Node())
 	return &RenderedTree{Object: tree}
+}
+
+func (t *RenderedTree) ReRender(props gr.Props) {
+	t.reRender(props)
 }
 
 // TODO(bep)
 // Move this to its own repo maybe when it is more mature.
 type RenderedTree struct {
 	*js.Object
-	// reRender: [Function],
-	// getMountedInstance: [Function],
-	subTree func(string, map[string]interface{}) *js.Object `js:"subTree"`
+	reRender           func(map[string]interface{})                    `js:"reRender"`
+	getMountedInstance func() *js.Object                               `js:"getMountedInstance"`
+	subTree            func(string, map[string]interface{}) *js.Object `js:"subTree"`
 	// subTreeLike: [Function],
 	// everySubTree: [Function],
 	// everySubTreeLike: [Function],
@@ -48,7 +54,7 @@ type RenderedTree struct {
 	//findComponent: [Function],
 	//findComponentLike: [Function],
 	GetRenderOutput func() map[string]interface{} `js:"getRenderOutput"`
-	String          func() string                 `js:"toString"`
+	toString        func() string                 `js:"toString"`
 	Props           Props                         `js:"props"`
 	Type            string                        `js:"type"`
 }
@@ -65,6 +71,13 @@ func (p Props) CallEventListener(name string, args ...interface{}) *js.Object {
 
 func NewMatcher(key, value string) Matcher {
 	return Matcher{key: key, value: value}
+}
+
+var renderStringReplacers = strings.NewReplacer("  ", "", "\n", "")
+
+func (t *RenderedTree) String() string {
+	s := t.toString()
+	return renderStringReplacers.Replace(s)
 }
 
 func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
@@ -90,36 +103,8 @@ func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
 	return &RenderedTree{Object: subTree}
 }
 
-func (tree *RenderedTree) HasAllProps(t *testing.T, matchers ...Matcher) {
-	for _, m := range matchers {
-		found := false
-		for key, val := range tree.Props {
-			if m.key == key && m.value == val {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Fatalf("Prop %q/%q not found", m.key, m.value)
-		}
-	}
-}
-
-// Copied from testify, MIT licensed
-// Copyright (c) 2012 - 2013 Mat Ryer and Tyler Bunnell
-// https://github.com/stretchr/testify/blob/master/LICENSE
-func isNil(object interface{}) bool {
-	if object == nil {
-		return true
-	}
-
-	value := reflect.ValueOf(object)
-	kind := value.Kind()
-	if kind >= reflect.Chan && kind <= reflect.Slice && value.IsNil() {
-		return true
-	}
-
-	return false
+func (t *RenderedTree) This() *gr.This {
+	return gr.NewThis(t.getMountedInstance())
 }
 
 var (
@@ -142,4 +127,21 @@ func init() {
 		panic("Skin deep not found, make sure it is loaded.")
 	}
 
+}
+
+// Code below copied from testify, MIT licensed
+// Copyright (c) 2012 - 2013 Mat Ryer and Tyler Bunnell
+// https://github.com/stretchr/testify/blob/master/LICENSE
+func isNil(object interface{}) bool {
+	if object == nil {
+		return true
+	}
+
+	value := reflect.ValueOf(object)
+	kind := value.Kind()
+	if kind >= reflect.Chan && kind <= reflect.Slice && value.IsNil() {
+		return true
+	}
+
+	return false
 }

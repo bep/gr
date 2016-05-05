@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "react-addons-test-utils": "^15.0.2",
-    "skin-deep": "^0.16.0"
+    "skin-deep": "git://github.com/glenjamin/skin-deep"
   },
   "scripts": {
     "test": "gopherjs test github.com/bep/gr/tests"

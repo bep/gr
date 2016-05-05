@@ -10,7 +10,7 @@ import (
 
 func TestRenderButton(t *testing.T) {
 	button := el.Button(gr.Text("Shiny Button"))
-	tree := grt.Shallow(button)
+	tree := grt.ShallowRender(button)
 
 	grt.Equal(t, "<button>Shiny Button</button>", tree.String())
 }
@@ -19,7 +19,7 @@ func TestRenderNestedSimple(t *testing.T) {
 	div := el.Div(
 		el.Button(gr.Text("Button in Div")),
 	)
-	tree := grt.Shallow(div)
+	tree := grt.ShallowRender(div)
 
 	grt.Equal(t, "<div><button>Button in Div</button></div>", tree.String())
 }
@@ -38,9 +38,9 @@ func TestRenderNestedComplex(t *testing.T) {
 		),
 		el.Div(),
 	)
-	tree := grt.Shallow(div)
+	tree := grt.ShallowRender(div)
 
 	grt.Equal(t,
-		"<div><div><p>P1</p></div><div><p>P2</p><div><p>P3</p><div></div></div></div><div></div></div>",
+		"<div><div><p>P1</p></div><div><p>P2</p><div><p>P3</p><div /></div></div><div /></div>",
 		tree.String())
 }

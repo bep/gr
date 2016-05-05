@@ -75,7 +75,6 @@ func (mods Modifiers) Modify(e *Element) {
 }
 
 func (e *Element) createElement() *js.Object {
-
 	if e.properties == nil {
 		e.properties = make(map[string]interface{})
 	}

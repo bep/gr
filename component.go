@@ -115,6 +115,15 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	root := &ReactComponent{r: r}
 
 	classProps := js.Global.Get("Object").New()
+
+	// TODO(bep)
+	//classProps.Set("displayName", "TODO")
+	//classProps.Set("getDefaultProps",
+	//	js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} { return nil }))
+	//classProps.Set("propTypes", make(map[string]interface{}))
+	//classProps.Set("mixins", nil)
+	//classProps.Set("statics", nil)
+
 	// Every component needs to render itself.
 	classProps.Set("render", makeRenderFunc(r.Render))
 
@@ -156,7 +165,8 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	}
 
 	class := react.Call("createClass", classProps)
-	root.node = react.Call("createFactory", class)
+	//TODO(bep) factory vs class
+	root.node = class // react.Call("createFactory", class)
 
 	for _, opt := range options {
 		err := opt(root)
@@ -191,8 +201,9 @@ func (r *ReactComponent) Node() *js.Object {
 
 // Create implements the Factory interface.
 func (r *ReactComponent) Create(props Props) *Element {
-	elm := react.Call("createElement", r.Node(), props)
-	e := NewPreparedElement(elm)
+	elem := react.Call("createElement", r.Node(), props)
+	//TODO(bep) factory vs class elem := r.Node().Invoke(props)
+	e := NewPreparedElement(elem)
 	return e
 }
 
@@ -210,6 +221,19 @@ func (r *ReactComponent) Render(elementID string, props Props) {
 // See http://facebook.github.io/react/docs/component-specs.html#lifecycle-methods
 
 // TODO(bep) Consider some better names. Move to subpackage?
+
+// Lifecycler contains all the lifecycles. Mostly useful for testing.
+type Lifecycler interface {
+	Renderer
+	StateInitializer
+	ShouldComponentUpdate
+	ComponentWillUpdate
+	ComponentWillReceiveProps
+	ComponentDidUpdate
+	ComponentWillMount
+	ComponentWillUnmount
+	ComponentDidMount
+}
 
 // Renderer is the core interface used to render a Element.
 type Renderer interface {
@@ -295,7 +319,7 @@ func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This,
 		state = arguments[1].Interface().(map[string]interface{})
 	}
 
-	that := makeThis(this)
+	that := NewThis(this)
 
 	return that, props, state
 }
@@ -304,10 +328,10 @@ func makeVoidFunc(f func(this *This), assumeBlocking bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		if assumeBlocking {
 			go func() {
-				f(makeThis(this))
+				f(NewThis(this))
 			}()
 		} else {
-			f(makeThis(this))
+			f(NewThis(this))
 		}
 		return nil
 	})
@@ -315,15 +339,14 @@ func makeVoidFunc(f func(this *This), assumeBlocking bool) *js.Object {
 
 func makeStateFunc(f func(this *This) State) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		return f(makeThis(this))
+		return f(NewThis(this))
 	})
 }
 
 func makeRenderFunc(f func(this *This) Component) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		that := makeThis(this)
+		that := NewThis(this)
 		comp := f(that)
-
 		idFactory := &incrementor{}
 		addMissingKeys(comp, idFactory)
 		// TODO(bep) refactor
@@ -354,6 +377,7 @@ func addEventListeners(c Component, that *This) {
 		for _, child := range e.children {
 			addEventListeners(child, that)
 		}
+
 	}
 }
 

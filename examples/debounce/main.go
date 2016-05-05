@@ -72,7 +72,6 @@ var (
 		clientY := e.Int("screenY")
 
 		f := func() {
-			println(e)
 			counter := this.State().Int("counter") + 1
 			this.SetState(gr.State{"mouseX": clientX, "mouseY": clientY, "counter": counter})
 		}

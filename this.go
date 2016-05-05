@@ -63,7 +63,7 @@ func (t *This) SetState(s State) {
 	t.this.Call("setState", s)
 }
 
-func makeThis(that *js.Object) *This {
+func NewThis(that *js.Object) *This {
 	return &This{this: that}
 }
 

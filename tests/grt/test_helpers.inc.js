@@ -1,4 +1,4 @@
 global.React = require('react');
-global.assert = require('assert');
+global.ReactElementToString = require('react-element-to-string')
 global.sd = require('skin-deep');
 
