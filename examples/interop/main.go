@@ -35,7 +35,7 @@ func (e elapser) Render(this *gr.This) gr.Component {
 	message := fmt.Sprintf("Go Timer has been successfully running for %v seconds.", elapsed)
 
 	internalCounter := examples.Alert("info", el.Strong(gr.Text(message)))
-	externalCounter := examples.Alert("warning", externalComponent.Create(this.Props()))
+	externalCounter := examples.Alert("warning", externalComponent.CreateElement(this.Props()))
 
 	return examples.Example(title, internalCounter, externalCounter)
 }

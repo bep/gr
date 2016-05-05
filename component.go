@@ -26,7 +26,7 @@ type Component interface {
 // A Factory is a Component that can construct Elements (analogous to a ReactClass or a ReactFactory).
 type Factory interface {
 	Component
-	Create(props Props) *Element
+	CreateElement(props Props) *Element
 }
 
 // ReactComponent wraps a Facebook React component.
@@ -188,7 +188,7 @@ func CreateIfNeeded(c Component) *Element {
 	case *Element:
 		return v
 	case Factory:
-		return v.Create(nil)
+		return v.CreateElement(nil)
 	default:
 		return NewPreparedElement(c.Node())
 	}
@@ -199,8 +199,8 @@ func (r *ReactComponent) Node() *js.Object {
 	return r.node
 }
 
-// Create implements the Factory interface.
-func (r *ReactComponent) Create(props Props) *Element {
+// CreateElement implements the Factory interface.
+func (r *ReactComponent) CreateElement(props Props) *Element {
 	elem := react.Call("createElement", r.Node(), props)
 	//TODO(bep) factory vs class elem := r.Node().Invoke(props)
 	e := NewPreparedElement(elem)
@@ -210,7 +210,7 @@ func (r *ReactComponent) Create(props Props) *Element {
 // Render the Component in the DOM with the given element ID and props.
 func (r *ReactComponent) Render(elementID string, props Props) {
 	container := js.Global.Get("document").Call("getElementById", elementID)
-	elem := r.Create(props)
+	elem := r.CreateElement(props)
 
 	// TODO(bep) evaluate if the need the "this" returned on render.
 	reactDOM.Call("render", elem.Node(), container)

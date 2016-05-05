@@ -22,7 +22,7 @@ func TestClickableButton(t *testing.T) {
 	)
 
 	component := gr.NewSimpleComponent(button)
-	elem := component.Create(nil)
+	elem := component.CreateElement(nil)
 	tree := grt.ShallowRender(elem)
 
 	for i := 0; i < 42; i++ {

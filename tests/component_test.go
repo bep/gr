@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 	component := createLifecycler()
 
 	reactComponent := gr.New(component)
-	elem := reactComponent.Create(gr.Props{"text": "Initial Button"})
+	elem := reactComponent.CreateElement(gr.Props{"text": "Initial Button"})
 
 	r := grt.ShallowRender(elem)
 
@@ -111,3 +111,23 @@ func (l *testLifecycler) ComponentDidMount(this *gr.This) {
 	println("ComponentDidMount")
 	return
 }
+
+// func NewSimpleComponent(c Component, options ...func(*ReactComponent) error) *ReactComponent {
+// func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
+
+// type Component interface {
+//type Factory interface {
+
+// func FromJS(path ...string) *ReactComponent {
+
+// func Export(name string) func(*ReactComponent) error {
+// func Apply(f func(o *js.Object) *js.Object) func(*ReactComponent) error {
+
+// func CreateIfNeeded(c Component) *Element {
+
+// func (r *ReactComponent) Node() *js.Object {
+
+// func (r *ReactComponent) Create(props Props) *Element {
+// func (r *ReactComponent) Render(elementID string, props Props) {
+
+// +++ Life cycle
