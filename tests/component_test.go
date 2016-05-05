@@ -8,13 +8,23 @@ import (
 	"github.com/bep/gr"
 	"github.com/bep/gr/el"
 	"github.com/bep/gr/tests/grt"
+	"github.com/gopherjs/gopherjs/js"
 )
 
-// func NewSimpleRenderer(c Component) Renderer {
+const exportedTestComponent = "GrtTest"
+
 func TestNewSimpleRenderer(t *testing.T) {
 	button := el.Button(gr.Text("Shiny Button"))
 	renderer := gr.NewSimpleRenderer(button)
 	grt.Equal(t, button, renderer.Render(&gr.This{}))
+}
+
+func TestNewSimpleComponent(t *testing.T) {
+	button := el.Button(gr.Text("Simple Button"))
+	rc := gr.NewSimpleComponent(button)
+	elem := rc.CreateElement(nil)
+	r := grt.ShallowRender(elem)
+	grt.Equal(t, "<button>Simple Button</button>", r.String())
 }
 
 func TestNew(t *testing.T) {
@@ -49,6 +59,36 @@ func TestNew(t *testing.T) {
 	// TODO(bep) Find a way to check the other methods.
 	grt.Equal(t, 7, component.visitCounter)
 
+}
+
+func TestNewWithExport(t *testing.T) {
+	defer resetComponentState()
+
+	component := createLifecycler()
+
+	gr.New(component, gr.Export(exportedTestComponent))
+
+	reloaded := js.Global.Get(exportedTestComponent)
+
+	grt.NotNil(t, reloaded)
+}
+
+func TestNewWithApply(t *testing.T) {
+	applied := js.Global.Get("Object").New()
+
+	applier := func(o *js.Object) *js.Object {
+		return applied
+	}
+
+	component := createLifecycler()
+
+	reactComponent := gr.New(component, gr.Apply(applier))
+
+	grt.Equal(t, applied, reactComponent.Node())
+}
+
+func resetComponentState() {
+	js.Global.Set(exportedTestComponent, nil)
 }
 
 func createLifecycler() *testLifecycler {
@@ -112,22 +152,6 @@ func (l *testLifecycler) ComponentDidMount(this *gr.This) {
 	return
 }
 
-// func NewSimpleComponent(c Component, options ...func(*ReactComponent) error) *ReactComponent {
-// func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
-
-// type Component interface {
-//type Factory interface {
-
 // func FromJS(path ...string) *ReactComponent {
 
-// func Export(name string) func(*ReactComponent) error {
-// func Apply(f func(o *js.Object) *js.Object) func(*ReactComponent) error {
-
 // func CreateIfNeeded(c Component) *Element {
-
-// func (r *ReactComponent) Node() *js.Object {
-
-// func (r *ReactComponent) Create(props Props) *Element {
-// func (r *ReactComponent) Render(elementID string, props Props) {
-
-// +++ Life cycle

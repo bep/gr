@@ -21,6 +21,9 @@ func NotNil(t *testing.T, val interface{}) {
 	if isNil(val) {
 		Fail(t, fmt.Sprintf("Got <nil> for %T", val))
 	}
+	if val == js.Undefined {
+		Fail(t, fmt.Sprintf("Got undefined for %T", val))
+	}
 }
 
 func Fail(t *testing.T, args ...interface{}) {
