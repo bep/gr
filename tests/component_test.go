@@ -87,6 +87,17 @@ func TestNewWithApply(t *testing.T) {
 	grt.Equal(t, applied, reactComponent.Node())
 }
 
+func TestComponentFromJS(t *testing.T) {
+	rc := gr.FromJS("Hello")
+
+	grt.NotNil(t, rc)
+
+	elem := rc.CreateElement(gr.Props{"message": "Go Go React!"})
+	r := grt.ShallowRender(elem)
+
+	grt.Equal(t, "<h1>Go Go React!</h1>", r.String())
+}
+
 func resetComponentState() {
 	js.Global.Set(exportedTestComponent, nil)
 }
@@ -151,7 +162,5 @@ func (l *testLifecycler) ComponentDidMount(this *gr.This) {
 	println("ComponentDidMount")
 	return
 }
-
-// func FromJS(path ...string) *ReactComponent {
 
 // func CreateIfNeeded(c Component) *Element {
