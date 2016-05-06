@@ -3,6 +3,7 @@ package gr
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/gopherjs/gopherjs/js"
 )
@@ -116,8 +117,10 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 
 	classProps := js.Global.Get("Object").New()
 
-	// TODO(bep)
-	//classProps.Set("displayName", "TODO")
+	typ := fmt.Sprintf("%T", r)
+	displayName := strings.TrimLeft(typ, "*")
+	classProps.Set("displayName", displayName)
+
 	//classProps.Set("getDefaultProps", https://github.com/bep/gr/issues/23
 	//	js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} { return nil }))
 	//classProps.Set("propTypes", make(map[string]interface{}))

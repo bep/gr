@@ -31,12 +31,20 @@ func Fail(t *testing.T, args ...interface{}) {
 }
 
 func ShallowRender(c gr.Component) *RenderedTree {
+	if _, ok := c.(gr.Factory); ok {
+		panic("Cannot render factories, create an Element first")
+	}
 	tree := sd.Call("shallowRender", c.Node())
 	return &RenderedTree{Object: tree}
 }
 
 func (t *RenderedTree) ReRender(props gr.Props) {
 	t.reRender(props)
+}
+
+func (t *RenderedTree) Dive(path ...string) *RenderedTree {
+	tree := t.dive(path)
+	return &RenderedTree{Object: tree}
 }
 
 // TODO(bep)
@@ -46,13 +54,8 @@ type RenderedTree struct {
 	reRender           func(map[string]interface{})                    `js:"reRender"`
 	getMountedInstance func() *js.Object                               `js:"getMountedInstance"`
 	subTree            func(string, map[string]interface{}) *js.Object `js:"subTree"`
-	// subTreeLike: [Function],
-	// everySubTree: [Function],
-	// everySubTreeLike: [Function],
-	// dive: [Function],
-	// findNode: [Function],
-	// textIn: [Function],
-	Text func() string `js:"text"`
+	dive               func([]string) *js.Object                       `js:"dive"`
+	Text               func() string                                   `js:"text"`
 	// fillField: [Function],
 	//findComponent: [Function],
 	//findComponentLike: [Function],
