@@ -118,11 +118,11 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 
 	// TODO(bep)
 	//classProps.Set("displayName", "TODO")
-	//classProps.Set("getDefaultProps",
+	//classProps.Set("getDefaultProps", https://github.com/bep/gr/issues/23
 	//	js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} { return nil }))
 	//classProps.Set("propTypes", make(map[string]interface{}))
-	//classProps.Set("mixins", nil)
-	//classProps.Set("statics", nil)
+	//classProps.Set("mixins", nil) https://github.com/bep/gr/issues/24
+	//classProps.Set("statics", nil) https://github.com/bep/gr/issues/25
 
 	// Every component needs to render itself.
 	classProps.Set("render", makeRenderFunc(r.Render))

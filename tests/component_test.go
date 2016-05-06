@@ -169,5 +169,3 @@ func (l *testLifecycler) ComponentDidMount(this *gr.This) {
 	println("ComponentDidMount")
 	return
 }
-
-// func CreateIfNeeded(c Component) *Element {
