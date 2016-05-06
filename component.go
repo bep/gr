@@ -109,17 +109,33 @@ func NewSimpleComponent(c Component, options ...func(*ReactComponent) error) *Re
 	return New(NewSimpleRenderer(c), options...)
 }
 
+type reactClass struct {
+	*js.Object
+
+	displayName string `js:"displayName"`
+
+	render                    *js.Object `js:"render"`
+	getInitialState           *js.Object `js:"getInitialState"`
+	shouldComponentUpdate     *js.Object `js:"shouldComponentUpdate"`
+	componentWillUpdate       *js.Object `js:"componentWillUpdate"`
+	componentDidUpdate        *js.Object `js:"componentDidUpdate"`
+	componentWillReceiveProps *js.Object `js:"componentWillReceiveProps"`
+	componentWillMount        *js.Object `js:"componentWillMount"`
+	componentDidMount         *js.Object `js:"componentDidMount"`
+	componentWillUnmount      *js.Object `js:"componentWillUnmount"`
+}
+
 // New creates a new Component given a Renderer and optinal option(s).
 // Note that the Renderer is the minimum interface that needs to be implemented,
 // but New will perform interface upgrades for other lifecycle interfaces.
 func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	root := &ReactComponent{r: r}
 
-	classProps := js.Global.Get("Object").New()
+	reactClass := &reactClass{Object: js.Global.Get("Object").New()}
 
 	typ := fmt.Sprintf("%T", r)
 	displayName := strings.TrimLeft(typ, "*")
-	classProps.Set("displayName", displayName)
+	reactClass.displayName = displayName
 
 	//classProps.Set("getDefaultProps", https://github.com/bep/gr/issues/23
 	//	js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} { return nil }))
@@ -128,46 +144,42 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	//classProps.Set("statics", nil) https://github.com/bep/gr/issues/25
 
 	// Every component needs to render itself.
-	classProps.Set("render", makeRenderFunc(r.Render))
+	reactClass.render = makeRenderFunc(r.Render)
 
 	// Optional lifecycle implementations below.
 	if v, ok := r.(StateInitializer); ok {
-		classProps.Set("getInitialState", makeStateFunc(v.GetInitialState))
+		reactClass.getInitialState = makeStateFunc(v.GetInitialState)
 	}
 
 	if v, ok := r.(ShouldComponentUpdate); ok {
-		classProps.Set("shouldComponentUpdate", makeComponentUpdateFunc(v.ShouldComponentUpdate))
+		reactClass.shouldComponentUpdate = makeComponentUpdateFunc(v.ShouldComponentUpdate)
 	}
 
 	if v, ok := r.(ComponentWillUpdate); ok {
-		classProps.Set("componentWillUpdate", makeComponentUpdateVoidFunc(v.ComponentWillUpdate))
+		reactClass.componentWillUpdate = makeComponentUpdateVoidFunc(v.ComponentWillUpdate)
 	}
 
 	if v, ok := r.(ComponentDidUpdate); ok {
-		classProps.Set("componentDidUpdate", makeComponentUpdateVoidFunc(v.ComponentDidUpdate))
+		reactClass.componentDidUpdate = makeComponentUpdateVoidFunc(v.ComponentDidUpdate)
 	}
 
 	if v, ok := r.(ComponentWillReceiveProps); ok {
-		classProps.Set("componentWillReceiveProps", makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps))
-	}
-
-	if v, ok := r.(ShouldComponentUpdate); ok {
-		classProps.Set("shouldComponentUpdate", makeComponentUpdateFunc(v.ShouldComponentUpdate))
+		reactClass.componentWillReceiveProps = makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps)
 	}
 
 	if v, ok := r.(ComponentWillMount); ok {
-		classProps.Set("componentWillMount", makeVoidFunc(v.ComponentWillMount, true))
+		reactClass.componentWillMount = makeVoidFunc(v.ComponentWillMount, true)
 	}
 
 	if v, ok := r.(ComponentDidMount); ok {
-		classProps.Set("componentDidMount", makeVoidFunc(v.ComponentDidMount, true))
+		reactClass.componentDidMount = makeVoidFunc(v.ComponentDidMount, true)
 	}
 
 	if v, ok := r.(ComponentWillUnmount); ok {
-		classProps.Set("componentWillUnmount", makeVoidFunc(v.ComponentWillUnmount, true))
+		reactClass.componentWillUnmount = makeVoidFunc(v.ComponentWillUnmount, true)
 	}
 
-	class := react.Call("createClass", classProps)
+	class := react.Call("createClass", reactClass.Object)
 	//TODO(bep) factory vs class
 	root.node = class // react.Call("createFactory", class)
 
