@@ -27,6 +27,26 @@ func TestNewSimpleComponent(t *testing.T) {
 	grt.Equal(t, "<button>Simple Button</button>", r.String())
 }
 
+func TestCreateIfNeeded(t *testing.T) {
+
+	// 3 variants:
+	button := el.Button(gr.Text("Shiny Button"))
+	rc := gr.NewSimpleComponent(button)
+	custom := newTestCustomComponent()
+
+	buttonEl := gr.CreateIfNeeded(button)
+	rcEl := gr.CreateIfNeeded(rc)
+	customEl := gr.CreateIfNeeded(custom)
+
+	grt.Equal(t, button, buttonEl)
+	grt.NotNil(t, rcEl.Node())
+	grt.Equal(t, custom.Node(), customEl.Node())
+
+	r := grt.ShallowRender(rcEl)
+
+	grt.Equal(t, "<button>Shiny Button</button>", r.String())
+}
+
 func TestNew(t *testing.T) {
 	component := createLifecycler()
 
@@ -107,6 +127,18 @@ func TestComponentFromJS(t *testing.T) {
 
 func resetComponentState() {
 	js.Global.Set(exportedTestComponent, nil)
+}
+
+func newTestCustomComponent() *testCustomComponent {
+	return &testCustomComponent{Object: js.Global.Get("Object").New()}
+}
+
+type testCustomComponent struct {
+	*js.Object
+}
+
+func (c *testCustomComponent) Node() *js.Object {
+	return c.Object
 }
 
 func createLifecycler() *testLifecycler {
