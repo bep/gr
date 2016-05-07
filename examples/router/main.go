@@ -22,7 +22,7 @@ var (
 	// WithRouter makes this.props.router happen.
 	appComponent = gr.New(new(app), gr.Apply(grouter.WithRouter))
 
-	router = grouter.New("/", appComponent,
+	router = grouter.New("/", appComponent).With(
 		grouter.NewIndexRoute(grouter.Components{"main": component1}),
 		grouter.NewRoute("c1", grouter.Components{"main": component1}),
 		grouter.NewRoute("c2", grouter.Components{"main": component2}),
