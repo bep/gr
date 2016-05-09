@@ -42,6 +42,10 @@ type ReactComponent struct {
 
 	// Options
 	exportName string
+
+	// Needs to be created by createElement as opposed to standalone React factories.
+	// TODO(bep) figure a way to extract that info from the JS object.
+	needsCreate bool
 }
 
 // FromJS loads a React component from the JavaScript side of the fence.
@@ -63,7 +67,7 @@ func FromJS(path ...string) *ReactComponent {
 	}
 
 	// TODO(bep): No concept of a Renderer implementation here. Do we need it?
-	return &ReactComponent{node: component}
+	return &ReactComponent{node: component, needsCreate: true}
 }
 
 // Export is an option used to mark that the component should be exported to the
@@ -180,8 +184,8 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	}
 
 	class := react.Call("createClass", reactClass.Object)
-	//TODO(bep) factory vs class
-	root.node = class // react.Call("createFactory", class)
+
+	root.node = react.Call("createFactory", class)
 
 	for _, opt := range options {
 		err := opt(root)
@@ -216,8 +220,14 @@ func (r *ReactComponent) Node() *js.Object {
 
 // CreateElement implements the Factory interface.
 func (r *ReactComponent) CreateElement(props Props) *Element {
-	elem := react.Call("createElement", r.Node(), props)
-	//TODO(bep) factory vs class elem := r.Node().Invoke(props)
+	var elem *js.Object
+
+	if r.needsCreate {
+		elem = react.Call("createElement", r.Node(), props)
+	} else {
+		elem = r.Node().Invoke(props)
+	}
+
 	e := NewPreparedElement(elem)
 	return e
 }
