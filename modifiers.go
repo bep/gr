@@ -12,6 +12,7 @@ func (s *textEl) Modify(in *Element) {
 	in.text = s.text
 }
 
+// Text creates a text element.
 func Text(i interface{}) Modifier {
 	text := toString(i)
 	return &textEl{text: text}
@@ -19,14 +20,20 @@ func Text(i interface{}) Modifier {
 
 type cssClasses []string
 
+// CSS creates a CSS element with the provided classes.
+// Note that duplicates are happily accepted.
 func CSS(classes ...string) Modifier {
 	return cssClasses(classes)
 }
 
+// Data creates a data attribute, e.g. data-columns="3"
+// See https://developer.mozilla.org/en-US/docs/Web/Guide/HTML/Using_data_attributes
 func Data(name, val string) Modifier {
 	return Prop("data-"+name, val)
 }
 
+// Aria creates an accessibility attributes.
+// See https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA
 func Aria(name, val string) Modifier {
 	return Prop("aria-"+name, val)
 }
@@ -36,6 +43,7 @@ type prop struct {
 	value interface{}
 }
 
+// Modify implements the Modifier interface.
 func (p *prop) Modify(element *Element) {
 	if element.properties == nil {
 		element.properties = make(map[string]interface{})
@@ -46,10 +54,12 @@ func (p *prop) Modify(element *Element) {
 	element.properties[p.name] = p.value
 }
 
+// Prop adds a custom attribute.
 func Prop(name string, value interface{}) Modifier {
 	return &prop{name: name, value: value}
 }
 
+// Modify implements the Modifier interface.
 func (m cssClasses) Modify(element *Element) {
 	if existing, ok := element.properties["className"]; ok {
 		//merge with existing
@@ -66,13 +76,15 @@ type style struct {
 
 type discard int
 
+// Modify implements the Modifier interface with a no-op.
 func (d discard) Modify(element *Element) {
 	// Do nothing!
 }
 
-// A Modifier that does nothing.
+// Discard is a Modifier that does nothing.
 var Discard = new(discard)
 
+// Modify implements the Modifier interface.
 func (s *style) Modify(element *Element) {
 	if element.style == nil {
 		element.style = make(map[string]interface{})
@@ -81,6 +93,7 @@ func (s *style) Modify(element *Element) {
 	element.style[s.name] = s.value
 }
 
+// Style adds a inline CSS style.
 func Style(name string, value interface{}) Modifier {
 	return &style{name: name, value: value}
 }
