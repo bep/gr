@@ -16,7 +16,7 @@ install:
   - pushd $HOME/gopath/src/github.com/gopherjs/gopherjs/node-syscall && node-gyp rebuild && mkdir -p ~/.node_libraries/ && cp build/Release/syscall.node ~/.node_libraries/syscall.node && popd
 
 script:
-  - gopherjs test github.com/bep/gr/tests
+  - make check
 
 os:
   - linux
