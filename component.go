@@ -360,7 +360,9 @@ func makeStateFunc(f func(this *This) State) *js.Object {
 
 func makeRenderFunc(f func(this *This) Component) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+
 		that := NewThis(this)
+
 		comp := f(that)
 		idFactory := &incrementor{}
 		addMissingKeys(comp, idFactory)

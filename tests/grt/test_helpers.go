@@ -30,31 +30,35 @@ func Fail(t *testing.T, args ...interface{}) {
 	t.Fatal(args)
 }
 
-func ShallowRender(c gr.Component) *RenderedTree {
+func ShallowRenderWithContext(c gr.Component, ctx gr.Context) *RenderedTree {
 	if _, ok := c.(gr.Factory); ok {
 		panic("Cannot render factories, create an Element first")
 	}
-	tree := sd.Call("shallowRender", c.Node())
-	return &RenderedTree{Object: tree}
+	tree := sd.Call("shallowRender", c.Node(), ctx)
+	return &RenderedTree{Object: tree, context: ctx}
+}
+
+func ShallowRender(c gr.Component) *RenderedTree {
+	return ShallowRenderWithContext(c, gr.Context{})
 }
 
 func (t *RenderedTree) ReRender(props gr.Props) {
-	t.reRender(props)
+	t.reRender(props, t.context)
 }
 
 func (t *RenderedTree) Dive(path ...string) *RenderedTree {
-	tree := t.dive(path)
-	return &RenderedTree{Object: tree}
+	tree := t.dive(path, t.context)
+	return &RenderedTree{Object: tree, context: t.context}
 }
 
 // TODO(bep)
 // Move this to its own repo maybe when it is more mature.
 type RenderedTree struct {
 	*js.Object
-	reRender           func(map[string]interface{})                    `js:"reRender"`
-	getMountedInstance func() *js.Object                               `js:"getMountedInstance"`
+	reRender           func(gr.Props, gr.Context)                      `js:"reRender"`
+	GetMountedInstance func() *js.Object                               `js:"getMountedInstance"`
 	subTree            func(string, map[string]interface{}) *js.Object `js:"subTree"`
-	dive               func([]string) *js.Object                       `js:"dive"`
+	dive               func([]string, gr.Context) *js.Object           `js:"dive"`
 	Text               func() string                                   `js:"text"`
 	// fillField: [Function],
 	//findComponent: [Function],
@@ -63,6 +67,8 @@ type RenderedTree struct {
 	toString        func() string                 `js:"toString"`
 	Props           Props                         `js:"props"`
 	Type            string                        `js:"type"`
+
+	context gr.Context
 }
 
 type Props map[string]interface{}
@@ -110,7 +116,7 @@ func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
 }
 
 func (t *RenderedTree) This() *gr.This {
-	return gr.NewThis(t.getMountedInstance())
+	return gr.NewThis(t.GetMountedInstance())
 }
 
 var (

@@ -11,12 +11,16 @@ type This struct {
 }
 
 func (t *This) Props() Props {
+
 	// TODO(bep) cache?
 	po := t.this.Get("props")
 	keys := js.Keys(po)
 	props := Props{}
 	for _, key := range keys {
 		o := po.Get(key)
+		if o == js.Undefined {
+			panic("Got undefined object in props: " + key)
+		}
 		if strings.Contains(o.Get("$$typeof").String(), "react.element") {
 			// React elements can contain circular refs that goes into
 			// Uncaught RangeError: Maximum call stack size exceeded
@@ -30,8 +34,14 @@ func (t *This) Props() Props {
 	return props
 }
 
-func (t *This) Context() *js.Object {
-	return t.this.Get("context")
+func (t *This) Context() Context {
+	c := t.this.Get("context")
+
+	if c == js.Undefined {
+		panic("No context found")
+	}
+
+	return c.Interface().(map[string]interface{})
 }
 
 // Component returns a component stored in props by its name.
@@ -67,6 +77,7 @@ func NewThis(that *js.Object) *This {
 	return &This{this: that}
 }
 
+type Context map[string]interface{}
 type Props map[string]interface{}
 type State map[string]interface{}
 
