@@ -39,8 +39,8 @@ func Example(title string, mods ...gr.Modifier) *gr.Element {
 
 func exampleListItem(title, href, text string) gr.Modifier {
 	var (
-		itemStatus gr.Modifier = gr.Discard
-		loc                    = gr.Location()
+		itemStatus = gr.Discard
+		loc        = gr.Location()
 	)
 
 	if !strings.HasSuffix(href, "/") {
@@ -68,16 +68,16 @@ func Alert(classifier string, body gr.Modifier) *gr.Element {
 	return e
 }
 
-// Some reusable components to use in composition examples.
+// ClickCounter is a reusable components to use in composition examples.
 // This is just copy-paste from the click counter example. Consider making something else.
 type ClickCounter int
 
-// Implements the StateInitializer interface.
+// GetInitialState implements the StateInitializer interface.
 func (c ClickCounter) GetInitialState(this *gr.This) gr.State {
 	return gr.State{"counter": 0}
 }
 
-// Implements the Renderer interface.
+// Render implements the Renderer interface.
 func (c ClickCounter) Render(this *gr.This) gr.Component {
 	counter := this.State()["counter"]
 	message := fmt.Sprintf(" Click me! Number of clicks: %v", counter)
@@ -93,12 +93,14 @@ func (c ClickCounter) onClick(this *gr.This, event *gr.Event) {
 	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
 }
 
+// ShouldComponentUpdate implements the ShouldComponentUpdate interface.
 func (c ClickCounter) ShouldComponentUpdate(
 	this *gr.This, nextProps gr.Props, nextState gr.State) bool {
 
 	return this.State().HasChanged(nextState, "counter")
 }
 
+// ComponentDidMount implements the ComponentDidMount interface.
 func (c ClickCounter) ComponentDidMount(this *gr.This) {
 	println("ClickCounter: ComponentDidMount")
 }

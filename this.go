@@ -22,10 +22,14 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+// This is named for what it represents: The this context representation from the
+// JavaScript side of the fence.
 type This struct {
 	this *js.Object
 }
 
+// Props returns the properties set; what you would expect to find in
+// this.properties in React.
 func (t *This) Props() Props {
 
 	// TODO(bep) cache?
@@ -50,6 +54,8 @@ func (t *This) Props() Props {
 	return props
 }
 
+// Context returns the context set; what you would expect to find in
+// this.context in React.
 func (t *This) Context() Context {
 	c := t.this.Get("context")
 
@@ -70,6 +76,8 @@ func (t *This) Component(name string) Modifier {
 	return Discard
 }
 
+// State returns the state; what you would expect to find in
+// this.properties in React.
 func (t *This) State() State {
 	state := t.this.Get("state").Interface()
 	if state == nil {
@@ -78,6 +86,7 @@ func (t *This) State() State {
 	return state.(map[string]interface{})
 }
 
+// Int is concenience method to lookup a int value from state.
 func (s State) Int(key string) int {
 	if val, ok := s[key]; ok {
 		return int(val.(float64))
@@ -85,16 +94,23 @@ func (s State) Int(key string) int {
 	return 0
 }
 
+// SetState is a way of setting the state.
 func (t *This) SetState(s State) {
 	t.this.Call("setState", s)
 }
 
+// NewThis creates a new This based on a JavaScript object representation.
 func NewThis(that *js.Object) *This {
 	return &This{this: that}
 }
 
+// Context holds the React context.
 type Context map[string]interface{}
+
+// Props holds the React properties.
 type Props map[string]interface{}
+
+// State holds the React state.
 type State map[string]interface{}
 
 // HasChanged reports whether the value of the property with any of the given keys has changed.

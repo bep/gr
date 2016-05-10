@@ -35,12 +35,14 @@ import (
 	}
 }*/
 
+// UnmountComponentAtNode unmounts the DOM element at the given ID.
 func UnmountComponentAtNode(elementID string) bool {
 	// TODO(bep) maybe incorporate this DOM element into the component
 	container := js.Global.Get("document").Call("getElementById", elementID)
 	return reactDOM.Call("unmountComponentAtNode", container).Bool()
 }
 
+// HostInfo represents the location info from the browser window.
 type HostInfo struct {
 	Path     string
 	Port     int

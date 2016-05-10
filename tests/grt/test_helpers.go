@@ -1,3 +1,6 @@
+// Package grt contains utilities used to test React components.
+// TODO(bep)
+// Move this to its own repo maybe when it is more mature.
 package grt
 
 import (
@@ -10,6 +13,7 @@ import (
 	"github.com/gopherjs/gopherjs/js"
 )
 
+// Equal is a test assertion used to check equality.
 func Equal(t *testing.T, expected, actual interface{}) {
 	if expected != actual {
 		// TODO(bep) figure a way to get caller info
@@ -17,6 +21,7 @@ func Equal(t *testing.T, expected, actual interface{}) {
 	}
 }
 
+// NotNil is a test assertion that checks for both nil values and js.Undefined.
 func NotNil(t *testing.T, val interface{}) {
 	if isNil(val) {
 		Fail(t, fmt.Sprintf("Got <nil> for %T", val))
@@ -26,10 +31,12 @@ func NotNil(t *testing.T, val interface{}) {
 	}
 }
 
+// Fail fails the test with the given message.
 func Fail(t *testing.T, args ...interface{}) {
 	t.Fatal(args)
 }
 
+// ShallowRenderWithContext performs a shallow render with the given context.
 func ShallowRenderWithContext(c gr.Component, ctx gr.Context) *RenderedTree {
 	if _, ok := c.(gr.Factory); ok {
 		panic("Cannot render factories, create an Element first")
@@ -38,21 +45,23 @@ func ShallowRenderWithContext(c gr.Component, ctx gr.Context) *RenderedTree {
 	return &RenderedTree{Object: tree, context: ctx}
 }
 
+// ShallowRender performs a shallow render of the given component.
 func ShallowRender(c gr.Component) *RenderedTree {
 	return ShallowRenderWithContext(c, gr.Context{})
 }
 
+// ReRender rerenders a component with new properties.
 func (t *RenderedTree) ReRender(props gr.Props) {
 	t.reRender(props, t.context)
 }
 
+// Dive can be used to render a sub-component.
 func (t *RenderedTree) Dive(path ...string) *RenderedTree {
 	tree := t.dive(path, t.context)
 	return &RenderedTree{Object: tree, context: t.context}
 }
 
-// TODO(bep)
-// Move this to its own repo maybe when it is more mature.
+// RenderedTree represents a shallow render.
 type RenderedTree struct {
 	*js.Object
 	reRender           func(gr.Props, gr.Context)                      `js:"reRender"`
@@ -71,27 +80,37 @@ type RenderedTree struct {
 	context gr.Context
 }
 
+// Props represents the properties set on a React element.
+// This is the same as gr.Props, but reimplemented here so we can add
+// test methods to it.
 type Props map[string]interface{}
 
+// Matcher used to find a component in the component tree.
 type Matcher struct {
 	key, value string
 }
 
+// CallEventListener is a convenience func to simulate button clicks etc.
+// by calling the listener methods by name.
 func (p Props) CallEventListener(name string, args ...interface{}) *js.Object {
 	return p[name].(func(...interface{}) *js.Object)(name, args)
 }
 
+// NewMatcher creates a new matcher.
 func NewMatcher(key, value string) Matcher {
 	return Matcher{key: key, value: value}
 }
 
 var renderStringReplacers = strings.NewReplacer("  ", "", "\n", "")
 
+// String represents a shallow rendered component.
+// This is in heavy use in assertions, so we try to keep it stable.
 func (t *RenderedTree) String() string {
 	s := t.toString()
 	return renderStringReplacers.Replace(s)
 }
 
+// Sub returns a sub component matching the matchers.
 func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
 
 	m := make(map[string]interface{})
@@ -100,7 +119,7 @@ func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
 		m[matcher.key] = matcher.value
 	}
 
-	var args []interface{} = []interface{}{selector}
+	var args = []interface{}{selector}
 
 	if len(m) > 0 {
 		args = append(args, m)
@@ -115,6 +134,7 @@ func (t *RenderedTree) Sub(selector string, matchers ...Matcher) *RenderedTree {
 	return &RenderedTree{Object: subTree}
 }
 
+// This returns the this context of a shallow render.
 func (t *RenderedTree) This() *gr.This {
 	return gr.NewThis(t.GetMountedInstance())
 }

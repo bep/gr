@@ -24,7 +24,7 @@ func main() {
 type gist struct {
 	URL         string `json:"url"`
 	ID          string `json:"id"`
-	HtmlUrl     string `json:"html_url"`
+	URL         string `json:"html_url"`
 	CreatedAt   string `json:"created_at"`
 	Description string `json:"description"`
 }

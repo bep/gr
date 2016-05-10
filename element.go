@@ -43,6 +43,8 @@ var (
 	}
 )
 
+// Element represents a builder for a ReactElement.
+// An Element can be a simple text node or a HTML element with children, attributes etc.
 type Element struct {
 	tag            string
 	properties     map[string]interface{}
@@ -62,26 +64,31 @@ type Element struct {
 	*This
 }
 
+// NewElement creates a new Element with the given tag.
 func NewElement(tag string) *Element {
 	return &Element{tag: tag, properties: Props{}, elFactory: defaultElementFactory}
 }
 
-// Create an Element from a ready-to-use React element.
+// NewPreparedElement creates an Element from a ready-to-use React element.
 func NewPreparedElement(o *js.Object) *Element {
 	return &Element{element: o, elFactory: returnStoredElement}
 }
 
+// Node returns the resulting ReactElement.
 func (e *Element) Node() *js.Object {
 	e.element = e.elFactory(e)
 	return e.element
 }
 
+// Modify implements the Modifier interface.
 func (e *Element) Modify(in *Element) {
 	in.children = append(in.children, e)
 }
 
+// Modifiers is used to Modify a list of elements (children).
 type Modifiers []Modifier
 
+// Modify implements the Modifier interface.
 func (mods Modifiers) Modify(e *Element) {
 	for _, m := range mods {
 		if m != nil {

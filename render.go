@@ -26,6 +26,8 @@ const (
 	defaultWaitTime        = 1000 / defaultFramesPerSecond
 )
 
+// RenderLoop runs the given render func in a loop at the given interval.
+// It can be stopped by closing the returned channel.
 func RenderLoop(render func(), interval ...time.Duration) chan struct{} {
 
 	renderInterval := defaultWaitTime * time.Millisecond
