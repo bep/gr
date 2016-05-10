@@ -2,6 +2,8 @@
 
 [![Build Status](https://travis-ci.org/bep/gr.svg)](https://travis-ci.org/bep/gr)
 [![GoDoc](https://godoc.org/github.com/bep/gr?status.svg)](https://godoc.org/github.com/bep/gr)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bep/gr)](https://goreportcard.com/report/github.com/bep/gr)
+
 		
 [GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
 
