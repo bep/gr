@@ -17,6 +17,8 @@ limitations under the License.
 package tests
 
 import (
+	"fmt"
+	"sort"
 	"testing"
 
 	"time"
@@ -100,7 +102,7 @@ func TestNew(t *testing.T) {
 
 	// TODO(bep) Verify that this is the expected behavior in this case.
 	// TODO(bep) Find a way to check the other methods.
-	grt.Equal(t, 9, component.visitCounter)
+	grt.Equal(t, 9, component.totalVisits())
 
 }
 
@@ -158,6 +160,35 @@ func TestComponentFromJS(t *testing.T) {
 	grt.Equal(t, "<h1>Go Go React!</h1>", r.String())
 }
 
+func TestForceUpdate(t *testing.T) {
+	component := createLifecycler()
+
+	reactComponent := gr.New(component)
+	elem := reactComponent.CreateElement(gr.Props{"text": "Initial Button"})
+
+	r := grt.ShallowRender(elem)
+
+	grt.Equal(t, `<div><button style={{"color": "blue"}}>Initial Button</button></div>`,
+		r.String())
+
+	this := r.This()
+	this.SetState(gr.State{"color": "indigo"})
+
+	this.ForceUpdate()
+
+	time.Sleep(200 * time.Millisecond)
+
+	grt.Equal(t, `<div><button style={{"color": "indigo"}}>Initial Button</button></div>`,
+		r.String())
+
+	//component.printVisits()
+	grt.Equal(t, 7, component.totalVisits())
+	grt.Equal(t, 1, component.visitCounter("ComponentWillUpdate"))
+	grt.Equal(t, 2, component.visitCounter("Render"))
+	grt.Equal(t, 1, component.visitCounter("ComponentDidUpdate"))
+
+}
+
 func resetComponentState() {
 	js.Global.Set(exportedTestComponent, nil)
 }
@@ -196,25 +227,57 @@ func (c *testCompositeComponent) Render(this *gr.This) gr.Component {
 }
 
 func createLifecycler() *testLifecycler {
-	return &testLifecycler{color: "blue"}
+	return &testLifecycler{color: "blue", visits: make(map[string]int)}
 }
 
 func createLifecyclerWithColor(color string) gr.Factory {
-	return gr.New(&testLifecycler{color: color})
+	return gr.New(&testLifecycler{color: color, visits: make(map[string]int)})
 }
 
 type testLifecycler struct {
-	color        string
-	visitCounter int
+	color  string
+	visits map[string]int
 }
 
-func (l *testLifecycler) visited() {
-	l.visitCounter++
+func (l *testLifecycler) visited(m string) {
+	if v, ok := l.visits[m]; ok {
+		l.visits[m] = v + 1
+	} else {
+		l.visits[m] = 1
+	}
+}
+
+func (l *testLifecycler) totalVisits() int {
+	c := 0
+
+	for _, v := range l.visits {
+		c += v
+	}
+	return c
+}
+
+func (l *testLifecycler) printVisits() {
+	keys := make([]string, 0)
+	for k := range l.visits {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+	for _, key := range keys {
+		println(fmt.Sprintf("%s: %d", key, l.visitCounter(key)))
+	}
+
+}
+
+func (l *testLifecycler) visitCounter(m string) int {
+	if v, ok := l.visits[m]; ok {
+		return v
+	}
+	return 0
 }
 
 func (l *testLifecycler) Render(this *gr.This) gr.Component {
-	l.visited()
-	//println("Render")
+	l.visited("Render")
 	color := this.State()["color"]
 	text := this.Props()["text"]
 	elem := el.Div(
@@ -225,37 +288,29 @@ func (l *testLifecycler) Render(this *gr.This) gr.Component {
 }
 
 func (l *testLifecycler) GetInitialState(this *gr.This) gr.State {
-	l.visited()
-	//println("GetInitialState")
+	l.visited("GetInitialState")
 	return gr.State{"color": l.color}
 }
 func (l *testLifecycler) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
-	l.visited()
-	//println("ShouldComponentUpdate")
+	l.visited("ShouldComponentUpdate")
 	return this.Props().HasChanged(nextProps, "text")
 }
 func (l *testLifecycler) ComponentWillUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) {
-	l.visited()
-	//println("ComponentWillUpdate")
+	l.visited("ComponentWillUpdate")
 }
 func (l *testLifecycler) ComponentWillReceiveProps(this *gr.This, props gr.Props) {
-	l.visited()
-	//println("ComponentWillReceiveProps")
+	l.visited("ComponentWillReceiveProps")
 }
 func (l *testLifecycler) ComponentDidUpdate(this *gr.This, prevProps gr.Props, prevState gr.State) {
-	l.visited()
-	//println("ComponentDidUpdate")
+	l.visited("ComponentDidUpdate")
 }
 func (l *testLifecycler) ComponentWillMount(this *gr.This) {
-	l.visited()
-	//println("ComponentWillMount")
+	l.visited("ComponentWillMount")
 }
 func (l *testLifecycler) ComponentWillUnmount(this *gr.This) {
-	l.visited()
-	//println("ComponentWillUnmount")
+	l.visited("ComponentWillUnmount")
 }
 func (l *testLifecycler) ComponentDidMount(this *gr.This) {
-	l.visited()
-	//println("ComponentDidMount")
+	l.visited("ComponentDidMount")
 	return
 }

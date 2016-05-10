@@ -99,6 +99,11 @@ func (t *This) SetState(s State) {
 	t.this.Call("setState", s)
 }
 
+// ForceUpdate forces a re-render of the component.
+func (t *This) ForceUpdate() {
+	t.this.Call("forceUpdate")
+}
+
 // NewThis creates a new This based on a JavaScript object representation.
 func NewThis(that *js.Object) *This {
 	return &This{this: that}
