@@ -38,11 +38,16 @@ func (e *Event) Int(key string) int {
 
 // An EventListener can be attached to a HTML element to listen for events, mouse clicks etc.
 type EventListener struct {
-	name     string
-	listener func(*This, *Event)
-	// TODO(bep) prevent...
+	name           string
+	listener       func(*This, *Event)
 	preventDefault bool
 	delegate       func(jsEvent *js.Object)
+}
+
+// PreventDefault prevents the default event behaviour in the browser.
+func (l *EventListener) PreventDefault() *EventListener {
+	l.preventDefault = true
+	return l
 }
 
 // Listener is the signature for the func that needs to be implemented by the
