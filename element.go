@@ -76,7 +76,9 @@ func NewPreparedElement(o *js.Object) *Element {
 
 // Node returns the resulting ReactElement.
 func (e *Element) Node() *js.Object {
-	e.element = e.elFactory(e)
+	if e.element == nil {
+		e.element = e.elFactory(e)
+	}
 	return e.element
 }
 
