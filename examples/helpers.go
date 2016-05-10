@@ -39,8 +39,8 @@ func Example(title string, mods ...gr.Modifier) *gr.Element {
 
 func exampleListItem(title, href, text string) gr.Modifier {
 	var (
-		itemStatus = gr.Discard
-		loc        = gr.Location()
+		itemStatus gr.Modifier = gr.Discard
+		loc                    = gr.Location()
 	)
 
 	if !strings.HasSuffix(href, "/") {
