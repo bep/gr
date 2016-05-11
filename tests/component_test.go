@@ -257,7 +257,7 @@ func (l *testLifecycler) totalVisits() int {
 }
 
 func (l *testLifecycler) printVisits() {
-	keys := make([]string, 0)
+	var keys []string
 	for k := range l.visits {
 		keys = append(keys, k)
 	}

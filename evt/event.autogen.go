@@ -357,7 +357,7 @@ func Ended(listener gr.Listener) *gr.EventListener {
 	return gr.NewEventListener("onEnded", listener)
 }
 
-// Error gets notified when an error occurs that prevents the utterance from being succesfully spoken.
+// Error gets notified when an error occurs that prevents the utterance from being successfully spoken.
 //
 // https://developer.mozilla.org/docs/Web/Events/error_(SpeechSynthesisError)
 func Error(listener gr.Listener) *gr.EventListener {
@@ -651,7 +651,7 @@ func PageShow(listener gr.Listener) *gr.EventListener {
 	return gr.NewEventListener("onPageShow", listener)
 }
 
-// Paste gets notified when data has been transfered from the system clipboard to the document.
+// Paste gets notified when data has been transferred from the system clipboard to the document.
 //
 // https://developer.mozilla.org/docs/Web/Events/paste
 func Paste(listener gr.Listener) *gr.EventListener {
