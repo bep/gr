@@ -1,6 +1,6 @@
 DIRS=$(shell go list -f {{.Dir}} ./...)
 
-check: fmt vet test
+check: fmt vet lint test
 
 cyclo:
 	@for d in $(DIRS) ; do \
