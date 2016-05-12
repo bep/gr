@@ -58,15 +58,16 @@ type ReactComponent struct {
 
 	// Options
 	exportName string
+	globalName string
 
 	// Needs to be created by createElement as opposed to standalone React factories.
 	// TODO(bep) figure a way to extract that info from the JS object.
 	needsCreate bool
 }
 
-// FromJS loads a React component from the JavaScript side of the fence.
-// TODO(bep) investigate modules.
-func FromJS(path ...string) *ReactComponent {
+// FromGlobal loads a React component from JavaScript's global object
+// ("window" for browsers and "GLOBAL" for Node.js)
+func FromGlobal(path ...string) *ReactComponent {
 
 	var component *js.Object
 
@@ -86,15 +87,45 @@ func FromJS(path ...string) *ReactComponent {
 	return &ReactComponent{node: component, needsCreate: true}
 }
 
+// Require loads a module the Node.js way.
+// Note that this requires that the require function is present; if in the browser,
+// and not in Node.js, try Browserify.
+func Require(path string) *ReactComponent {
+	require := js.Global.Get("require")
+
+	if require == js.Undefined {
+		panic("require() not defined; if this is not Node.js, give Browserify a try.")
+	}
+
+	m := require.Invoke(path)
+
+	if m == js.Undefined {
+		panic(fmt.Sprintf("Module %q not found", path))
+	}
+
+	return &ReactComponent{node: m, needsCreate: true}
+}
+
 // Export is an option used to mark that the component should be exported to the
-// JavaScript world as a global with the given name.
-// TODO(bep) Again, explore the world of JavaScript modules.
+// JavaScript world as a Node.js module export.
 func Export(name string) func(*ReactComponent) error {
 	return func(r *ReactComponent) error {
 		if name == "" {
 			return errors.New("Must provide export name")
 		}
 		r.exportName = name
+		return nil
+	}
+}
+
+// Global is an option used to mark that the component should be exported to the
+// JavaScript world as a global with the given name.
+func Global(name string) func(*ReactComponent) error {
+	return func(r *ReactComponent) error {
+		if name == "" {
+			return errors.New("Must provide global name")
+		}
+		r.globalName = name
 		return nil
 	}
 }
@@ -426,7 +457,14 @@ func addEventListeners(c Component, that *This) {
 
 func (r *ReactComponent) handleOptionsOnCreate() {
 	if r.exportName != "" {
-		js.Global.Set(r.exportName, r.node)
+		exports := js.Module.Get("exports")
+		if exports == js.Undefined {
+			panic("module.exports not present.")
+		}
+		exports.Set(r.exportName, r.node)
+	}
+	if r.globalName != "" {
+		js.Global.Set(r.globalName, r.node)
 	}
 }
 

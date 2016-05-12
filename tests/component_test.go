@@ -130,6 +130,18 @@ func TestNewWithExport(t *testing.T) {
 
 	gr.New(component, gr.Export(exportedTestComponent))
 
+	reloaded := js.Module.Get("exports").Get(exportedTestComponent)
+
+	grt.NotNil(t, reloaded)
+}
+
+func TestNewWithGlobal(t *testing.T) {
+	defer resetComponentState()
+
+	var component gr.Lifecycler = createLifecycler()
+
+	gr.New(component, gr.Global(exportedTestComponent))
+
 	reloaded := js.Global.Get(exportedTestComponent)
 
 	grt.NotNil(t, reloaded)
@@ -149,8 +161,8 @@ func TestNewWithApply(t *testing.T) {
 	grt.Equal(t, applied, reactComponent.Node())
 }
 
-func TestComponentFromJS(t *testing.T) {
-	rc := gr.FromJS("Hello")
+func TestComponentFromGlobal(t *testing.T) {
+	rc := gr.FromGlobal("Hello")
 
 	grt.NotNil(t, rc)
 
@@ -158,6 +170,19 @@ func TestComponentFromJS(t *testing.T) {
 	r := grt.ShallowRender(elem)
 
 	grt.Equal(t, "<h1>Go Go React!</h1>", r.String())
+}
+
+func TestRequire(t *testing.T) {
+	rc := gr.Require("react-bootstrap/lib/Alert")
+
+	grt.NotNil(t, rc.Node())
+
+	elem := rc.CreateElement(nil)
+
+	r := grt.ShallowRender(elem)
+
+	grt.Equal(t, `<div closeLabel="Close Alert" bsClass="alert" bsStyle="info" role="alert" className="alert alert-info"></div>`, r.String())
+
 }
 
 func TestForceUpdate(t *testing.T) {
@@ -191,6 +216,7 @@ func TestForceUpdate(t *testing.T) {
 
 func resetComponentState() {
 	js.Global.Set(exportedTestComponent, nil)
+	js.Module.Get("exports").Set(exportedTestComponent, nil)
 }
 
 func newTestCustomComponent() *testCustomComponent {

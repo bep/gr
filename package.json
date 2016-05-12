@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "react-addons-test-utils": "^15.0.2",
-	"react-element-to-string": "^1.0.2",
+    "react-bootstrap": "^0.29.4",
+    "react-element-to-string": "^1.0.2",
     "skin-deep": "git://github.com/glenjamin/skin-deep"
   },
   "scripts": {

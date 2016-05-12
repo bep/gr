@@ -32,9 +32,29 @@ func Example(title string, mods ...gr.Modifier) *gr.Element {
 			el.Div(
 				el.Emphasis(gr.Text("Facebook React in Go: ")),
 				el.Anchor(attr.HRef("https://github.com/bep/gr/"),
-					gr.Text("https://github.com/bep/gr/")))))
+					gr.Text("https://github.com/bep/gr/")),
+			)),
+	)
 
 	return elem
+}
+
+// Panel creates a panel.
+func Panel(title string, body ...gr.Modifier) *gr.Element {
+	mods := gr.Modifiers(body)
+	return el.Div(gr.CSS("panel", "panel-primary"),
+		el.Div(gr.CSS("panel-heading"), el.Header2(gr.Text(title))),
+		el.Div(gr.CSS("panel-body"),
+			mods),
+		el.Div(gr.CSS("panel-footer"),
+			el.Div(
+				el.Emphasis(gr.Text("Facebook React in Go: ")),
+				el.Anchor(attr.HRef("https://github.com/bep/gr/"),
+					gr.Text("https://github.com/bep/gr/")),
+				el.Anchor(attr.HRef("../basic/"),
+					gr.Text(" - More examples")),
+			)))
+
 }
 
 func exampleListItem(title, href, text string) gr.Modifier {

@@ -7,4 +7,8 @@ do
 	popd
 done
 
+pushd interop
+browserify -r ./interop-ext-module.js:ElapserExtModule > interop-ext-module-bundle.js 
+browserify -x ./interop-ext-module.js interop-ext-reverse.js > interop-ext-reverse-bundle.js 
 
+popd

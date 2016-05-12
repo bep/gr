@@ -1,7 +1,7 @@
-var ElapserExt = React.createClass({
+ module.exports = React.createClass({
     render: function () {
         var message =
-            'JavaScript timer has been successfully running for ' + this.props.elapsed + ' seconds.';
+            'Module JavaScript timer has been successfully running for ' + this.props.elapsed + ' seconds.';
 
         return React.DOM.div(null, message)
     },
