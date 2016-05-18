@@ -51,7 +51,6 @@ type Element struct {
 	style          map[string]interface{}
 	eventListeners []*EventListener
 
-	// An element is either a text node or a container with children.
 	text     string
 	children []Component
 
@@ -109,27 +108,25 @@ func (e *Element) createElement() *js.Object {
 		e.properties["style"] = e.style
 	}
 
+	args := make([]interface{}, 0)
+
 	if e.text != "" {
-		return react.Call("createElement", e.tag, e.properties, e.text)
+		args = append(args, e.text)
 	}
 
 	if len(e.children) > 0 {
-		children := make([]interface{}, len(e.children))
-
 		for _, c := range e.children {
-			children = append(children, c.Node())
+			args = append(args, c.Node())
 		}
-
-		return createElement(e.tag, e.properties, children)
 	}
 
-	return createElement(e.tag, e.properties)
+	return createElement(e.tag, e.properties, args)
 }
 
-func createElement(tag string, props map[string]interface{}, children ...interface{}) *js.Object {
-	if len(children) == 0 {
+func createElement(tag string, props map[string]interface{}, args ...interface{}) *js.Object {
+	if len(args) == 0 {
 		return react.Call("createElement", tag, props)
 	}
 
-	return react.Call("createElement", tag, props, children)
+	return react.Call("createElement", tag, props, args)
 }
