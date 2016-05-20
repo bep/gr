@@ -48,7 +48,7 @@ type Factory interface {
 
 // ReactComponent wraps a Facebook React component.
 // This component can either be constructed from a Go implementation (see New) or
-// loaded from JavaScript (see FromJS).
+// loaded from JavaScript (see FromGlobal and Require).
 type ReactComponent struct {
 	// The React.createClass response.
 	node *js.Object
