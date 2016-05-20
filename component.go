@@ -421,8 +421,6 @@ func makeRenderFunc(f func(this *This) Component) *js.Object {
 		that := NewThis(this)
 
 		comp := f(that)
-		idFactory := &incrementor{}
-		addMissingKeys(comp, idFactory)
 		// TODO(bep) refactor
 		if e, ok := comp.(*Element); ok {
 			e.This = that
@@ -465,20 +463,5 @@ func (r *ReactComponent) handleOptionsOnCreate() {
 	}
 	if r.globalName != "" {
 		js.Global.Set(r.globalName, r.node)
-	}
-}
-
-func addMissingKeys(c Component, id *incrementor) {
-
-	if e, ok := c.(*Element); ok {
-		if e.properties == nil {
-			e.properties = make(map[string]interface{})
-		}
-		if _, ok := e.properties["key"]; !ok {
-			e.properties["key"] = id.next()
-		}
-		for _, c2 := range e.children {
-			addMissingKeys(c2, id)
-		}
 	}
 }

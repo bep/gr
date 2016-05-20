@@ -25,15 +25,6 @@ type Modifier interface {
 	Modify(element *Element)
 }
 
-type incrementor struct {
-	counter int
-}
-
-func (i *incrementor) next() int {
-	i.counter++
-	return i.counter
-}
-
 type elementFactory func(e *Element) *js.Object
 
 var (
