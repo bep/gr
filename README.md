@@ -43,24 +43,27 @@ func (c clickCounter) GetInitialState(this *gr.This) gr.State {
 // Implements the Renderer interface.
 func (c clickCounter) Render(this *gr.This) gr.Component {
 	counter := this.State()["counter"]
-	message := fmt.Sprintf("Click me! Number of clicks: %v", counter)
+	message := fmt.Sprintf(" Click me! Number of clicks: %v", counter)
 
-	return el.Div(
+	elem := el.Div(
 		el.Button(
 			gr.CSS("btn", "btn-lg", "btn-primary"),
+			gr.Style("color", this.Context()["color"]),
 			gr.Text(message),
 			evt.Click(c.onClick)))
+
+	return examples.Example("Click Counter", elem)
 }
 
 func (c clickCounter) onClick(this *gr.This, event *gr.Event) {
-	this.SetState(gr.State{"counter": this.StateInt("counter") + 1})
+	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (e clickCounter) ShouldComponentUpdate(
-	this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+func (c clickCounter) ShouldComponentUpdate(
+	this *gr.This, next gr.LifecycleData) bool {
 
-	return this.State().HasChanged(nextState, "counter")
+	return this.State().HasChanged(next.State, "counter")
 }
 ```
 
