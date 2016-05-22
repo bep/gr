@@ -56,9 +56,12 @@ type ReactComponent struct {
 	// The minimum interface needed to display something.
 	r Renderer
 
+	reactClass *reactClass
+
 	// Options
-	exportName string
-	globalName string
+	exportName      string
+	globalName      string
+	componentConfig ComponentConfig
 
 	// Needs to be created by createElement as opposed to standalone React factories.
 	// TODO(bep) figure a way to extract that info from the JS object.
@@ -106,36 +109,57 @@ func Require(path string) *ReactComponent {
 	return &ReactComponent{node: m, needsCreate: true}
 }
 
+// ComponentConfig is used to add optional static configuration to a component.
+type ComponentConfig struct {
+	ContextTypesTemplate Context
+}
+
+type Option struct {
+	action func(*ReactComponent) error
+
+	// Whether to apply this option on the created React component or not.
+	preparePhase bool
+}
+
+// WithConfig adds optional static configuration to the component.
+func WithConfig(config ComponentConfig) Option {
+	// This needs to run before createClass
+	return Option{preparePhase: true, action: func(r *ReactComponent) error {
+		r.componentConfig = config
+		return nil
+	}}
+}
+
 // Export is an option used to mark that the component should be exported to the
 // JavaScript world as a Node.js module export.
-func Export(name string) func(*ReactComponent) error {
-	return func(r *ReactComponent) error {
+func Export(name string) Option {
+	return Option{action: func(r *ReactComponent) error {
 		if name == "" {
 			return errors.New("Must provide export name")
 		}
 		r.exportName = name
 		return nil
-	}
+	}}
 }
 
 // Global is an option used to mark that the component should be exported to the
 // JavaScript world as a global with the given name.
-func Global(name string) func(*ReactComponent) error {
-	return func(r *ReactComponent) error {
+func Global(name string) Option {
+	return Option{action: func(r *ReactComponent) error {
 		if name == "" {
 			return errors.New("Must provide global name")
 		}
 		r.globalName = name
 		return nil
-	}
+	}}
 }
 
 // Apply the func to the newly created React component.
-func Apply(f func(o *js.Object) *js.Object) func(*ReactComponent) error {
-	return func(r *ReactComponent) error {
+func Apply(f func(o *js.Object) *js.Object) Option {
+	return Option{action: func(r *ReactComponent) error {
 		r.node = f(r.node)
 		return nil
-	}
+	}}
 }
 
 // NewSimpleRenderer can be used for quickly putting together components that only
@@ -156,7 +180,7 @@ func (s simpleRenderer) Render(this *This) Component {
 // NewSimpleComponent can be used for quickly putting together components that only
 // need to implement Renderer with no need of the owner (this) argument.
 // Especially convenient for testing.
-func NewSimpleComponent(c Component, options ...func(*ReactComponent) error) *ReactComponent {
+func NewSimpleComponent(c Component, options ...Option) *ReactComponent {
 	return New(NewSimpleRenderer(c), options...)
 }
 
@@ -165,8 +189,12 @@ type reactClass struct {
 
 	displayName string `js:"displayName"`
 
-	render                    *js.Object `js:"render"`
-	getInitialState           *js.Object `js:"getInitialState"`
+	render            *js.Object `js:"render"`
+	getInitialState   *js.Object `js:"getInitialState"`
+	getChildContext   *js.Object `js:"getChildContext"`
+	childContextTypes js.M       `js:"childContextTypes"`
+	contextTypes      js.M       `js:"contextTypes"`
+
 	shouldComponentUpdate     *js.Object `js:"shouldComponentUpdate"`
 	componentWillUpdate       *js.Object `js:"componentWillUpdate"`
 	componentDidUpdate        *js.Object `js:"componentDidUpdate"`
@@ -176,17 +204,29 @@ type reactClass struct {
 	componentWillUnmount      *js.Object `js:"componentWillUnmount"`
 }
 
+type delegateRenderer struct {
+	delegate func(this *This) Component
+}
+
+// Render implements the Renderer interface.
+func (d delegateRenderer) Render(this *This) Component {
+	return d.delegate(this)
+}
+
+// NewRenderer creates a Renderer with the provided func as the implementation.
+func NewRenderer(renderFunc func(this *This) Component) Renderer {
+	return delegateRenderer{renderFunc}
+}
+
 // New creates a new Component given a Renderer and optinal option(s).
 // Note that the Renderer is the minimum interface that needs to be implemented,
 // but New will perform interface upgrades for other lifecycle interfaces.
-func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
-	root := &ReactComponent{r: r}
-
-	reactClass := &reactClass{Object: js.Global.Get("Object").New()}
+func New(r Renderer, options ...Option) *ReactComponent {
+	root := &ReactComponent{r: r, reactClass: &reactClass{Object: js.Global.Get("Object").New()}}
 
 	typ := fmt.Sprintf("%T", r)
 	displayName := strings.TrimLeft(typ, "*")
-	reactClass.displayName = displayName
+	root.reactClass.displayName = displayName
 
 	//classProps.Set("getDefaultProps", https://github.com/bep/gr/issues/23
 	//	js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} { return nil }))
@@ -194,48 +234,69 @@ func New(r Renderer, options ...func(*ReactComponent) error) *ReactComponent {
 	//classProps.Set("mixins", nil) https://github.com/bep/gr/issues/24
 	//classProps.Set("statics", nil) https://github.com/bep/gr/issues/25
 
+	//root.reactClass.contextTypes = js.M{"color": react.Get("PropTypes").Get("string"), "id": react.Get("PropTypes").Get("number")}
+
 	// Every component needs to render itself.
-	reactClass.render = makeRenderFunc(r.Render)
+	root.reactClass.render = makeRenderFunc(r.Render)
 
 	// Optional lifecycle implementations below.
 	if v, ok := r.(StateInitializer); ok {
-		reactClass.getInitialState = makeStateFunc(v.GetInitialState)
+		root.reactClass.getInitialState = makeStateFunc(v.GetInitialState)
+	}
+
+	if v, ok := r.(ChildContextProvider); ok {
+		root.reactClass.getChildContext, root.reactClass.childContextTypes = makeChildContextFunc(v.GetChildContext)
 	}
 
 	if v, ok := r.(ShouldComponentUpdate); ok {
-		reactClass.shouldComponentUpdate = makeComponentUpdateFunc(v.ShouldComponentUpdate)
+		root.reactClass.shouldComponentUpdate = makeComponentUpdateFunc(v.ShouldComponentUpdate)
 	}
 
 	if v, ok := r.(ComponentWillUpdate); ok {
-		reactClass.componentWillUpdate = makeComponentUpdateVoidFunc(v.ComponentWillUpdate)
+		root.reactClass.componentWillUpdate = makeComponentUpdateVoidFunc(v.ComponentWillUpdate)
 	}
 
 	if v, ok := r.(ComponentDidUpdate); ok {
-		reactClass.componentDidUpdate = makeComponentUpdateVoidFunc(v.ComponentDidUpdate)
+		root.reactClass.componentDidUpdate = makeComponentUpdateVoidFunc(v.ComponentDidUpdate)
 	}
 
 	if v, ok := r.(ComponentWillReceiveProps); ok {
-		reactClass.componentWillReceiveProps = makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps)
+		root.reactClass.componentWillReceiveProps = makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps)
 	}
 
 	if v, ok := r.(ComponentWillMount); ok {
-		reactClass.componentWillMount = makeVoidFunc(v.ComponentWillMount, true)
+		root.reactClass.componentWillMount = makeVoidFunc(v.ComponentWillMount, true)
 	}
 
 	if v, ok := r.(ComponentDidMount); ok {
-		reactClass.componentDidMount = makeVoidFunc(v.ComponentDidMount, true)
+		root.reactClass.componentDidMount = makeVoidFunc(v.ComponentDidMount, true)
 	}
 
 	if v, ok := r.(ComponentWillUnmount); ok {
-		reactClass.componentWillUnmount = makeVoidFunc(v.ComponentWillUnmount, true)
+		root.reactClass.componentWillUnmount = makeVoidFunc(v.ComponentWillUnmount, true)
 	}
 
-	class := react.Call("createClass", reactClass.Object)
+	for _, opt := range options {
+		if !opt.preparePhase {
+			continue
+		}
+		err := opt.action(root)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	root.handleOptionsOnPrepare()
+
+	class := react.Call("createClass", root.reactClass.Object)
 
 	root.node = react.Call("createFactory", class)
 
 	for _, opt := range options {
-		err := opt(root)
+		if opt.preparePhase {
+			continue
+		}
+		err := opt.action(root)
 		if err != nil {
 			panic(err)
 		}
@@ -298,6 +359,7 @@ func (r *ReactComponent) Render(elementID string, props Props) {
 type Lifecycler interface {
 	Renderer
 	StateInitializer
+	ChildContextProvider
 	ShouldComponentUpdate
 	ComponentWillUpdate
 	ComponentWillReceiveProps
@@ -315,6 +377,21 @@ type Renderer interface {
 // StateInitializer sets up the initial state.
 type StateInitializer interface {
 	GetInitialState(this *This) State
+}
+
+// ChildContextProvider provides the context for the children.
+//
+// The GetChildContext function will be called when the state or props changes.
+// In order to update data in the context, trigger a local state update with this.SetState.
+// This will trigger a new context and changes will be received by the children.
+//
+// GetChildContext will also be called once in the init phase, to determine the types for
+// the context properties. The this will be nil in this single invocation, and there is no need to return
+// real data as long as the types are real (in cases where this is an expensive operation).
+//
+// See https://facebook.github.io/react/docs/context.html
+type ChildContextProvider interface {
+	GetChildContext(this *This) Context
 }
 
 // ShouldComponentUpdate gets invoked before rendering when new props or state are being received.
@@ -415,6 +492,36 @@ func makeStateFunc(f func(this *This) State) *js.Object {
 	})
 }
 
+func makeChildContextFunc(f func(this *This) Context) (*js.Object, js.M) {
+
+	getChildContext := js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		return f(NewThis(this))
+	})
+
+	childContextTypes := extractPropTypesFromTemplate(f(nil))
+
+	return getChildContext, childContextTypes
+}
+
+func extractPropTypesFromTemplate(t map[string]interface{}) js.M {
+	propTypes := js.M{}
+
+	for k, v := range t {
+		switch v.(type) {
+		case string:
+			propTypes[k] = react.Get("PropTypes").Get("string")
+		case int:
+			propTypes[k] = react.Get("PropTypes").Get("number")
+		default:
+			// See: https://facebook.github.io/react/docs/reusable-components.html
+			// TODO(bep): Reconsider all of this.
+			panic("Context type not implemented")
+		}
+	}
+
+	return propTypes
+}
+
 func makeRenderFunc(f func(this *This) Component) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 
@@ -463,5 +570,12 @@ func (r *ReactComponent) handleOptionsOnCreate() {
 	}
 	if r.globalName != "" {
 		js.Global.Set(r.globalName, r.node)
+	}
+
+}
+
+func (r *ReactComponent) handleOptionsOnPrepare() {
+	if r.componentConfig.ContextTypesTemplate != nil {
+		r.reactClass.contextTypes = extractPropTypesFromTemplate(r.componentConfig.ContextTypesTemplate)
 	}
 }

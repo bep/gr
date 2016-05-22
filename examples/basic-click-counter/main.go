@@ -35,6 +35,7 @@ func (c clickCounter) Render(this *gr.This) gr.Component {
 	elem := el.Div(
 		el.Button(
 			gr.CSS("btn", "btn-lg", "btn-primary"),
+			gr.Style("color", this.Context()["color"]),
 			gr.Text(message),
 			evt.Click(c.onClick)))
 

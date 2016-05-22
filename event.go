@@ -25,7 +25,7 @@ type Event struct {
 	*js.Object
 }
 
-// Persist can be used to make sure the event survives Facebook Reac's recycling of
+// Persist can be used to make sure the event survives Facebook React's recycling of
 // events. Useful to avoid confusing debugging sessions in the console.
 func (e *Event) Persist() {
 	e.Call("persist")

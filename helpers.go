@@ -66,6 +66,7 @@ func Location() HostInfo {
 	return loc
 }
 
+// TODO(bep)
 func toString(i interface{}) string {
 	switch v := i.(type) {
 	case string:

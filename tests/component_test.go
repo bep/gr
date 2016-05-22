@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/bep/gr"
+	"github.com/bep/gr/attr"
 	"github.com/bep/gr/el"
 	"github.com/bep/gr/tests/grt"
 	"github.com/gopherjs/gopherjs/js"
@@ -99,10 +100,10 @@ func TestNew(t *testing.T) {
 	r.ReRender(newProps)
 
 	time.Sleep(200 * time.Millisecond)
-
+	//component.printVisits()
 	// TODO(bep) Verify that this is the expected behavior in this case.
 	// TODO(bep) Find a way to check the other methods.
-	grt.Equal(t, 9, component.totalVisits())
+	grt.Equal(t, 12, component.totalVisits())
 
 }
 
@@ -207,11 +208,30 @@ func TestForceUpdate(t *testing.T) {
 		r.String())
 
 	//component.printVisits()
-	grt.Equal(t, 7, component.totalVisits())
+	grt.Equal(t, 10, component.totalVisits())
 	grt.Equal(t, 1, component.visitCounter("ComponentWillUpdate"))
 	grt.Equal(t, 2, component.visitCounter("Render"))
 	grt.Equal(t, 1, component.visitCounter("ComponentDidUpdate"))
+	grt.Equal(t, 2, component.visitCounter("GetChildContext"))
+	grt.Equal(t, 1, component.visitCounter("GetChildContext-init"))
 
+}
+
+func TestContext(t *testing.T) {
+
+	ctx := gr.Context{"color": "green", "id": 42}
+
+	config := gr.ComponentConfig{ContextTypesTemplate: ctx}
+
+	rc := gr.New(&testParentWithContext{child: gr.New(new(testChildWithContext), gr.WithConfig(config))})
+
+	elem := rc.CreateElement(nil)
+
+	r := grt.ShallowRenderWithContext(elem, ctx)
+
+	c := r.Dive("tests.testChildWithContext")
+
+	grt.Equal(t, `<button id={42} style={{"color": "green"}}></button>`, c.String())
 }
 
 func resetComponentState() {
@@ -258,6 +278,29 @@ func createLifecycler() *testLifecycler {
 
 func createLifecyclerWithColor(color string) gr.Factory {
 	return gr.New(&testLifecycler{color: color, visits: make(map[string]int)})
+}
+
+type testParentWithContext struct {
+	child gr.Factory
+}
+
+func (l *testParentWithContext) Render(this *gr.This) gr.Component {
+	return el.Div(
+		l.child.CreateElement(nil),
+	)
+}
+
+func (l *testParentWithContext) GetChildContext(this *gr.This) gr.Context {
+	return gr.Context{"color": "blue", "id": 62}
+}
+
+type testChildWithContext int
+
+func (l *testChildWithContext) Render(this *gr.This) gr.Component {
+	return el.Button(
+		gr.Style("color", this.Context()["color"]),
+		attr.ID(this.Context()["id"]),
+	)
 }
 
 type testLifecycler struct {
@@ -317,6 +360,16 @@ func (l *testLifecycler) GetInitialState(this *gr.This) gr.State {
 	l.visited("GetInitialState")
 	return gr.State{"color": l.color}
 }
+
+func (l *testLifecycler) GetChildContext(this *gr.This) gr.Context {
+	label := "GetChildContext"
+	if this == nil {
+		label += "-init"
+	}
+	l.visited(label)
+	return gr.Context{"color": l.color}
+}
+
 func (l *testLifecycler) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
 	l.visited("ShouldComponentUpdate")
 	return this.Props().HasChanged(nextProps, "text")
