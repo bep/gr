@@ -96,7 +96,7 @@ func (c clickCounter) onClick(this *gr.This, event *gr.Event) {
 
 // Implements the ShouldComponentUpdate interface.
 func (c clickCounter) ShouldComponentUpdate(
-	this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+	this *gr.This, next gr.LifecycleData) bool {
 
-	return this.State().HasChanged(nextState, "counter")
+	return this.State().HasChanged(next.State, "counter")
 }

@@ -116,6 +116,6 @@ func (g userGists) ComponentWillUnmount(this *gr.This) {
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (g userGists) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
-	return this.State().HasChanged(nextState, "gists")
+func (g userGists) ShouldComponentUpdate(this *gr.This, next gr.LifecycleData) bool {
+	return this.State().HasChanged(next.State, "gists")
 }

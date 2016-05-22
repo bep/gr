@@ -99,7 +99,7 @@ func (e *Element) createElement() *js.Object {
 		e.properties["style"] = e.style
 	}
 
-	args := make([]interface{}, 0)
+	var args []interface{}
 
 	if e.text != "" {
 		args = append(args, e.text)

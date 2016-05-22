@@ -16,9 +16,10 @@ import (
 func main() {
 
 	var (
-		component = gr.New(new(lifecycle))
-		props     = gr.Props{}
-		counter   = 1
+		lc        gr.Lifecycler = new(lifecycle)
+		component               = gr.New(lc)
+		props                   = gr.Props{}
+		counter                 = 1
 	)
 
 	quit := gr.RenderLoop(func() {
@@ -58,23 +59,29 @@ func (l lifecycle) GetInitialState(this *gr.This) gr.State {
 	return gr.State{"color": "#ffcc00"}
 }
 
+// Implements the ChildContext interface.
+func (l lifecycle) GetChildContext(this *gr.This) gr.Context {
+	log.Println("GetChildContext")
+	return gr.Context{}
+}
+
 // Implements the ShouldComponentUpdate interface
-func (l lifecycle) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
-	return this.Props().HasChanged(nextProps, "prop")
+func (l lifecycle) ShouldComponentUpdate(this *gr.This, next gr.LifecycleData) bool {
+	return this.Props().HasChanged(next.Props, "prop")
 }
 
 // Implements the ComponentWillUpdate interface
-func (l lifecycle) ComponentWillUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) {
+func (l lifecycle) ComponentWillUpdate(this *gr.This, next gr.LifecycleData) {
 	log.Println("ComponentWillUpdate")
 }
 
 // Implements the ComponentWillReceiveProps interface
-func (l lifecycle) ComponentWillReceiveProps(this *gr.This, p gr.Props) {
+func (l lifecycle) ComponentWillReceiveProps(this *gr.This, data gr.LifecycleData) {
 	log.Println("ComponentWillReceiveProps")
 }
 
 // Implements the ComponentDidUpdate interface
-func (l lifecycle) ComponentDidUpdate(this *gr.This, props gr.Props, state gr.State) {
+func (l lifecycle) ComponentDidUpdate(this *gr.This, data gr.LifecycleData) {
 	log.Println("ComponentDidUpdate")
 }
 

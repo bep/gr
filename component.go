@@ -114,6 +114,7 @@ type ComponentConfig struct {
 	ContextTypesTemplate Context
 }
 
+// Option is used to configure a component.
 type Option struct {
 	action func(*ReactComponent) error
 
@@ -369,6 +370,14 @@ type Lifecycler interface {
 	ComponentDidMount
 }
 
+// LifecycleData holds properties, context and state received in the lifecycle methods.
+// Note that any of these can be nil, depending on the context.
+type LifecycleData struct {
+	Props   Props
+	State   State
+	Context Context
+}
+
 // Renderer is the core interface used to render a Element.
 type Renderer interface {
 	Render(this *This) Component
@@ -397,25 +406,25 @@ type ChildContextProvider interface {
 // ShouldComponentUpdate gets invoked before rendering when new props or state are being received.
 // This is not called for the initial render or when forceUpdate is used.
 type ShouldComponentUpdate interface {
-	ShouldComponentUpdate(this *This, nextProps Props, nextState State) bool
+	ShouldComponentUpdate(this *This, next LifecycleData) bool
 }
 
 // ComponentWillUpdate gets invoked immediately before rendering when new props or state are being received.
 // This is not called for the initial render.
 type ComponentWillUpdate interface {
-	ComponentWillUpdate(this *This, nextProps Props, nextState State)
+	ComponentWillUpdate(this *This, next LifecycleData)
 }
 
 // ComponentWillReceiveProps gets invoked when a component is receiving new props.
 // This method is not called for the initial render.
 type ComponentWillReceiveProps interface {
-	ComponentWillReceiveProps(this *This, props Props)
+	ComponentWillReceiveProps(this *This, next LifecycleData)
 }
 
 // ComponentDidUpdate gets invoked immediately after the component's updates are flushed to the DOM.
 // This method is not called for the initial render.
 type ComponentDidUpdate interface {
-	ComponentDidUpdate(this *This, prevProps Props, prevState State)
+	ComponentDidUpdate(this *This, prev LifecycleData)
 }
 
 // ComponentWillMount get invoked once, both on the client and server, immediately before the initial rendering occurs.
@@ -434,43 +443,47 @@ type ComponentDidMount interface {
 	ComponentDidMount(this *This)
 }
 
-func makeComponentUpdateFunc(f func(this *This, props Props, state State) bool) *js.Object {
+func makeComponentUpdateFunc(f func(this *This, data LifecycleData) bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		return f(extractComponentUpdateArgs(this, arguments))
 	})
 }
 
-func makeComponentUpdateVoidFunc(f func(this *This, props Props, state State)) *js.Object {
+func makeComponentUpdateVoidFunc(f func(this *This, data LifecycleData)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		f(extractComponentUpdateArgs(this, arguments))
 		return nil
 	})
 }
 
-func makeComponentPropertyReceiverFunc(f func(this *This, props Props)) *js.Object {
+func makeComponentPropertyReceiverFunc(f func(this *This, data LifecycleData)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		that, props, _ := extractComponentUpdateArgs(this, arguments)
-		f(that, props)
+		that, data := extractComponentUpdateArgs(this, arguments)
+		f(that, data)
 		return nil
 	})
 }
 
-func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This, Props, State) {
+func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This, LifecycleData) {
 	var (
-		props Props
-		state State
+		props   Props
+		state   State
+		context Context
 	)
 
-	if arguments[0] != nil {
+	if len(arguments) > 0 && arguments[0] != nil {
 		props = arguments[0].Interface().(map[string]interface{})
 	}
-	if arguments[1] != nil {
+	if len(arguments) > 1 && arguments[1] != nil {
 		state = arguments[1].Interface().(map[string]interface{})
+	}
+	if len(arguments) > 2 && arguments[2] != nil {
+		context = arguments[2].Interface().(map[string]interface{})
 	}
 
 	that := NewThis(this)
 
-	return that, props, state
+	return that, LifecycleData{Props: props, State: state, Context: context}
 }
 
 func makeVoidFunc(f func(this *This), assumeBlocking bool) *js.Object {

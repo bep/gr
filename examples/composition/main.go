@@ -41,8 +41,8 @@ func (e elapser) Render(this *gr.This) gr.Component {
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (e elapser) ShouldComponentUpdate(this *gr.This, nextProps gr.Props, nextState gr.State) bool {
-	return this.Props().HasChanged(nextProps, "elapsed")
+func (e elapser) ShouldComponentUpdate(this *gr.This, next gr.LifecycleData) bool {
+	return this.Props().HasChanged(next.Props, "elapsed")
 }
 
 func (e elapser) ComponentDidMount(this *gr.This) {
