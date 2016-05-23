@@ -56,7 +56,7 @@ func (m mouseTracker) GetInitialState(this *gr.This) gr.State {
 }
 
 func (m mouseTracker) ShouldComponentUpdate(
-	this *gr.This, next gr.LifecycleData) bool {
+	this *gr.This, next gr.Cops) bool {
 	return this.State().HasChanged(next.State, "mouseX", "mouseY")
 }
 

@@ -350,20 +350,20 @@ func (r *ReactComponent) Render(elementID string, props Props) {
 	reactDOM.Call("render", elem.Node(), container)
 }
 
-func makeComponentUpdateFunc(f func(this *This, data LifecycleData) bool) *js.Object {
+func makeComponentUpdateFunc(f func(this *This, c Cops) bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		return f(extractComponentUpdateArgs(this, arguments))
 	})
 }
 
-func makeComponentUpdateVoidFunc(f func(this *This, data LifecycleData)) *js.Object {
+func makeComponentUpdateVoidFunc(f func(this *This, c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		f(extractComponentUpdateArgs(this, arguments))
 		return nil
 	})
 }
 
-func makeComponentPropertyReceiverFunc(f func(this *This, data LifecycleData)) *js.Object {
+func makeComponentPropertyReceiverFunc(f func(this *This, c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		that, data := extractComponentUpdateArgs(this, arguments)
 		f(that, data)
@@ -371,7 +371,7 @@ func makeComponentPropertyReceiverFunc(f func(this *This, data LifecycleData)) *
 	})
 }
 
-func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This, LifecycleData) {
+func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This, Cops) {
 	var (
 		props   Props
 		state   State
@@ -390,7 +390,7 @@ func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This,
 
 	that := NewThis(this)
 
-	return that, LifecycleData{Props: props, State: state, Context: context}
+	return that, Cops{Props: props, State: state, Context: context}
 }
 
 func makeVoidFunc(f func(this *This), assumeBlocking bool) *js.Object {

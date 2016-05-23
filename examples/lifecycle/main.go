@@ -66,22 +66,22 @@ func (l lifecycle) GetChildContext(this *gr.This) gr.Context {
 }
 
 // Implements the ShouldComponentUpdate interface
-func (l lifecycle) ShouldComponentUpdate(this *gr.This, next gr.LifecycleData) bool {
+func (l lifecycle) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
 	return this.Props().HasChanged(next.Props, "prop")
 }
 
 // Implements the ComponentWillUpdate interface
-func (l lifecycle) ComponentWillUpdate(this *gr.This, next gr.LifecycleData) {
+func (l lifecycle) ComponentWillUpdate(this *gr.This, next gr.Cops) {
 	log.Println("ComponentWillUpdate")
 }
 
 // Implements the ComponentWillReceiveProps interface
-func (l lifecycle) ComponentWillReceiveProps(this *gr.This, data gr.LifecycleData) {
+func (l lifecycle) ComponentWillReceiveProps(this *gr.This, data gr.Cops) {
 	log.Println("ComponentWillReceiveProps")
 }
 
 // Implements the ComponentDidUpdate interface
-func (l lifecycle) ComponentDidUpdate(this *gr.This, data gr.LifecycleData) {
+func (l lifecycle) ComponentDidUpdate(this *gr.This, data gr.Cops) {
 	log.Println("ComponentDidUpdate")
 }
 

@@ -370,17 +370,17 @@ func (l *testLifecycler) GetChildContext(this *gr.This) gr.Context {
 	return gr.Context{"color": l.color}
 }
 
-func (l *testLifecycler) ShouldComponentUpdate(this *gr.This, next gr.LifecycleData) bool {
+func (l *testLifecycler) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
 	l.visited("ShouldComponentUpdate")
 	return this.Props().HasChanged(next.Props, "text")
 }
-func (l *testLifecycler) ComponentWillUpdate(this *gr.This, next gr.LifecycleData) {
+func (l *testLifecycler) ComponentWillUpdate(this *gr.This, next gr.Cops) {
 	l.visited("ComponentWillUpdate")
 }
-func (l *testLifecycler) ComponentWillReceiveProps(this *gr.This, data gr.LifecycleData) {
+func (l *testLifecycler) ComponentWillReceiveProps(this *gr.This, data gr.Cops) {
 	l.visited("ComponentWillReceiveProps")
 }
-func (l *testLifecycler) ComponentDidUpdate(this *gr.This, prev gr.LifecycleData) {
+func (l *testLifecycler) ComponentDidUpdate(this *gr.This, prev gr.Cops) {
 	l.visited("ComponentDidUpdate")
 }
 func (l *testLifecycler) ComponentWillMount(this *gr.This) {

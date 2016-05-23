@@ -34,12 +34,12 @@ type Lifecycler interface {
 	ComponentDidMount
 }
 
-// LifecycleData holds properties, context and state received in the lifecycle methods.
+// Cops holds COntext, Props and State received in the lifecycle methods.
 // Note that any of these can be nil, depending on the context.
-type LifecycleData struct {
+type Cops struct {
+	Context Context
 	Props   Props
 	State   State
-	Context Context
 }
 
 // Renderer is the core interface used to render a Element.
@@ -70,25 +70,25 @@ type ChildContextProvider interface {
 // ShouldComponentUpdate gets invoked before rendering when new props or state are being received.
 // This is not called for the initial render or when forceUpdate is used.
 type ShouldComponentUpdate interface {
-	ShouldComponentUpdate(this *This, next LifecycleData) bool
+	ShouldComponentUpdate(this *This, next Cops) bool
 }
 
 // ComponentWillUpdate gets invoked immediately before rendering when new props or state are being received.
 // This is not called for the initial render.
 type ComponentWillUpdate interface {
-	ComponentWillUpdate(this *This, next LifecycleData)
+	ComponentWillUpdate(this *This, next Cops)
 }
 
 // ComponentWillReceiveProps gets invoked when a component is receiving new props.
 // This method is not called for the initial render.
 type ComponentWillReceiveProps interface {
-	ComponentWillReceiveProps(this *This, next LifecycleData)
+	ComponentWillReceiveProps(this *This, next Cops)
 }
 
 // ComponentDidUpdate gets invoked immediately after the component's updates are flushed to the DOM.
 // This method is not called for the initial render.
 type ComponentDidUpdate interface {
-	ComponentDidUpdate(this *This, prev LifecycleData)
+	ComponentDidUpdate(this *This, prev Cops)
 }
 
 // ComponentWillMount get invoked once, both on the client and server, immediately before the initial rendering occurs.
