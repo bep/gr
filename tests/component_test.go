@@ -64,6 +64,7 @@ func TestCreateIfNeeded(t *testing.T) {
 	r := grt.ShallowRender(rcEl)
 
 	grt.Equal(t, "<button>Shiny Button</button>", r.String())
+
 }
 
 func TestNew(t *testing.T) {
