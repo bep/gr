@@ -29,6 +29,16 @@ var (
 	reactDOM = js.Global.Get("ReactDOM")
 )
 
+func init() {
+	if react == js.Undefined {
+		panic("React not found in the global object.")
+	}
+
+	if reactDOM == js.Undefined {
+		panic("ReactDOM not found in the global object.")
+	}
+}
+
 // A Component represents a React JS component.
 //
 // http://facebook.github.io/react/docs/glossary.html#react-nodes for a reference.
