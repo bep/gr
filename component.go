@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/bep/gr/support"
 	"github.com/gopherjs/gopherjs/js"
 )
 
@@ -30,12 +31,15 @@ var (
 )
 
 func init() {
-	if react == js.Undefined {
-		panic("React not found in the global object.")
-	}
-
-	if reactDOM == js.Undefined {
-		panic("ReactDOM not found in the global object.")
+	if react == js.Undefined || reactDOM == js.Undefined {
+		// Require as a fallback
+		var err error
+		if react, err = support.Require("react"); err != nil {
+			panic(fmt.Sprintf("Cannot find React"))
+		}
+		if reactDOM, err = support.Require("react-dom"); err != nil {
+			panic(fmt.Sprintf("Cannot find ReactDOM"))
+		}
 	}
 }
 
@@ -104,18 +108,10 @@ func FromGlobal(path ...string) *ReactComponent {
 // Note that this requires that the require function is present; if in the browser,
 // and not in Node.js, try Browserify.
 func Require(path string) *ReactComponent {
-	require := js.Global.Get("require")
-
-	if require == js.Undefined {
-		panic("require() not defined; if this is not Node.js, give Browserify a try.")
+	m, err := support.Require(path)
+	if err != nil {
+		panic(err)
 	}
-
-	m := require.Invoke(path)
-
-	if m == js.Undefined {
-		panic(fmt.Sprintf("Module %q not found", path))
-	}
-
 	return &ReactComponent{node: m, needsCreate: true}
 }
 
