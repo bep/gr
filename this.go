@@ -41,6 +41,9 @@ func (t *This) Props() Props {
 		if o == js.Undefined {
 			panic("Got undefined object in props: " + key)
 		}
+		if o == nil {
+			continue
+		}
 		if strings.Contains(o.Get("$$typeof").String(), "react.element") {
 			// React elements can contain circular refs that goes into
 			// Uncaught RangeError: Maximum call stack size exceeded
