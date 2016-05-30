@@ -115,7 +115,7 @@ func TestCompositeComponents(t *testing.T) {
 	elem := rc.CreateElement(gr.Props{"text": "Composite Test"})
 	r := grt.ShallowRender(elem)
 
-	grt.Equal(t, `<div><h1>Composite Test</h1><tests.testLifecycler text="c1" /><tests.testLifecycler text="c2" /><tests.testLifecycler text="c3" /></div>`,
+	grt.Equal(t, `<div><h1>Composite Test</h1><tests.testLifecycler text="c1"></tests.testLifecycler><tests.testLifecycler text="c2"></tests.testLifecycler><tests.testLifecycler text="c3"></tests.testLifecycler></div>`,
 		r.String())
 
 	// dive into the first subcomponent

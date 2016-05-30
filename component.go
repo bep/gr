@@ -57,7 +57,7 @@ type Component interface {
 // A Factory is a Component that can construct Elements (analogous to a ReactClass or a ReactFactory).
 type Factory interface {
 	Component
-	CreateElement(props Props) *Element
+	CreateElement(props Props, children ...*Element) *Element
 }
 
 // ReactComponent wraps a Facebook React component.
@@ -107,8 +107,8 @@ func FromGlobal(path ...string) *ReactComponent {
 // Require loads a module the Node.js way.
 // Note that this requires that the require function is present; if in the browser,
 // and not in Node.js, try Browserify.
-func Require(path string) *ReactComponent {
-	m, err := support.Require(path)
+func Require(path ...string) *ReactComponent {
+	m, err := support.Require(path...)
 	if err != nil {
 		panic(err)
 	}

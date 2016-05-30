@@ -26,18 +26,26 @@ import (
 // Require loads a JS object the Node.js way.
 // Note that this requires that the require function is present; if in the browser,
 // and not in Node.js, try Browserify.
-func Require(path string) (*js.Object, error) {
+func Require(path ...string) (*js.Object, error) {
 	require := js.Global.Get("require")
 
 	if require == js.Undefined {
-		return nil, errors.New("require() not defined; if this is not Node.js, give Browserify a try.")
+		return nil, errors.New("require() not defined; if this is not Node.js, give Browserify a try")
 	}
 
-	m := require.Invoke(path)
+	var component *js.Object
 
-	if m == js.Undefined {
+	for _, p := range path {
+		if component != nil {
+			component = component.Get(p)
+		} else {
+			component = require.Invoke(p)
+		}
+	}
+
+	if component == js.Undefined {
 		return nil, fmt.Errorf("Module %q not found", path)
 	}
 
-	return m, nil
+	return component, nil
 }
