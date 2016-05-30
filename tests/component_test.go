@@ -232,7 +232,7 @@ func TestContext(t *testing.T) {
 
 	c := r.Dive("tests.testChildWithContext")
 
-	grt.Equal(t, `<button id={42} style={{"color": "green"}}></button>`, c.String())
+	grt.Equal(t, `<button id={42} style={{"color": "green"}} />`, c.String())
 }
 
 func resetComponentState() {

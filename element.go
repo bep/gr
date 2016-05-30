@@ -112,9 +112,10 @@ func (e *Element) createElement() *js.Object {
 	}
 
 	return createElement(e.tag, e.properties, args)
+
 }
 
-func createElement(tag string, props map[string]interface{}, args ...interface{}) *js.Object {
+func createElement(tag string, props map[string]interface{}, args []interface{}) *js.Object {
 	if len(args) == 0 {
 		return react.Call("createElement", tag, props)
 	}
