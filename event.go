@@ -31,6 +31,16 @@ func (e *Event) Persist() {
 	e.Call("persist")
 }
 
+// Target gives the target triggering this event.
+func (e *Event) Target() *js.Object {
+	return e.Get("target")
+}
+
+// CurrentTarget gives the currentTarget, i.e. the container triggering this event.
+func (e *Event) CurrentTarget() *js.Object {
+	return e.Get("currentTarget")
+}
+
 // Int is a convenience method to get an Event attribute as an Int value, e.g. screenX.
 func (e *Event) Int(key string) int {
 	return e.Get(key).Int()

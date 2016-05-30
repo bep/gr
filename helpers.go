@@ -77,8 +77,7 @@ func toString(i interface{}) string {
 		}
 		panic("Invalid string type")
 	}
-
-	return ""
+	return fmt.Sprint(i)
 }
 
 func toInt(i interface{}) int {
