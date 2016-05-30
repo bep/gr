@@ -334,13 +334,21 @@ func (r *ReactComponent) Node() *js.Object {
 }
 
 // CreateElement implements the Factory interface.
-func (r *ReactComponent) CreateElement(props Props) *Element {
+func (r *ReactComponent) CreateElement(props Props, children ...*Element) *Element {
 	var elem *js.Object
 
+	var args []interface{}
+
+	if len(children) > 0 {
+		for _, c := range children {
+			args = append(args, c.Node())
+		}
+	}
+
 	if r.needsCreate {
-		elem = react.Call("createElement", r.Node(), props)
+		elem = react.Call("createElement", r.Node(), props, args)
 	} else {
-		elem = r.Node().Invoke(props)
+		elem = r.Node().Invoke(props, args)
 	}
 
 	e := NewPreparedElement(elem)
