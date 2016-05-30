@@ -17,6 +17,7 @@ limitations under the License.
 package gr
 
 import (
+	"reflect"
 	"strings"
 
 	"github.com/gopherjs/gopherjs/js"
@@ -133,7 +134,7 @@ func (s State) HasChanged(nextState State, keys ...string) bool {
 
 func hasChanged(m1, m2 map[string]interface{}, keys ...string) bool {
 	for _, key := range keys {
-		if m1[key] != m2[key] {
+		if !reflect.DeepEqual(m1[key], m2[key]) {
 			return true
 		}
 	}
