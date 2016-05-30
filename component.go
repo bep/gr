@@ -57,7 +57,7 @@ type Component interface {
 // A Factory is a Component that can construct Elements (analogous to a ReactClass or a ReactFactory).
 type Factory interface {
 	Component
-	CreateElement(props Props, children ...*Element) *Element
+	CreateElement(props Props, children ...Component) *Element
 }
 
 // ReactComponent wraps a Facebook React component.
@@ -244,7 +244,7 @@ func New(r Renderer, options ...Option) *ReactComponent {
 	//root.reactClass.contextTypes = js.M{"color": react.Get("PropTypes").Get("string"), "id": react.Get("PropTypes").Get("number")}
 
 	// Every component needs to render itself.
-	root.reactClass.render = makeRenderFunc(r.Render)
+	root.reactClass.render = makeRenderFunc(displayName, r.Render)
 
 	// Optional lifecycle implementations below.
 	if v, ok := r.(StateInitializer); ok {
@@ -334,25 +334,30 @@ func (r *ReactComponent) Node() *js.Object {
 }
 
 // CreateElement implements the Factory interface.
-func (r *ReactComponent) CreateElement(props Props, children ...*Element) *Element {
-	var elem *js.Object
+// TODO(bep) consolidate and clean
+func (r *ReactComponent) CreateElement(props Props, children ...Component) *Element {
+	return &Element{properties: props, children: children, elFactory: createElementElementFactory(r)}
+}
 
-	var args []interface{}
+func createElementElementFactory(r *ReactComponent) func(e *Element) *js.Object {
+	return func(e *Element) *js.Object {
+		var elem *js.Object
 
-	if len(children) > 0 {
-		for _, c := range children {
-			args = append(args, c.Node())
+		var args []interface{}
+
+		if len(e.children) > 0 {
+			for _, c := range e.children {
+				args = append(args, c.Node())
+			}
 		}
-	}
 
-	if r.needsCreate {
-		elem = react.Call("createElement", r.Node(), props, args)
-	} else {
-		elem = r.Node().Invoke(props, args)
+		if r.needsCreate {
+			elem = react.Call("createElement", r.Node(), e.properties, args)
+		} else {
+			elem = r.Node().Invoke(e.properties, args)
+		}
+		return elem
 	}
-
-	e := NewPreparedElement(elem)
-	return e
 }
 
 // Render the Component in the DOM with the given element ID and props.
@@ -456,7 +461,16 @@ func extractPropTypesFromTemplate(t map[string]interface{}) js.M {
 	return propTypes
 }
 
-func makeRenderFunc(f func(this *This) Component) *js.Object {
+type incrementor struct {
+	counter int
+}
+
+func (i *incrementor) next() int {
+	i.counter++
+	return i.counter
+}
+
+func makeRenderFunc(s string, f func(this *This) Component) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 
 		that := NewThis(this)
@@ -466,6 +480,8 @@ func makeRenderFunc(f func(this *This) Component) *js.Object {
 		if e, ok := comp.(*Element); ok {
 			e.This = that
 			addEventListeners(comp, that)
+			idFactory := &incrementor{}
+			addMissingKeys(s, e, idFactory)
 		}
 		if _, ok := comp.(Factory); ok {
 			panic("Render should return a ready-to-use Element.")
@@ -511,5 +527,24 @@ func (r *ReactComponent) handleOptionsOnCreate() {
 func (r *ReactComponent) handleOptionsOnPrepare() {
 	if r.componentConfig.ContextTypesTemplate != nil {
 		r.reactClass.contextTypes = extractPropTypesFromTemplate(r.componentConfig.ContextTypesTemplate)
+	}
+}
+
+func addMissingKeys(s string, e *Element, id *incrementor) {
+
+	if !e.dynamic {
+		if e.properties == nil {
+			e.properties = make(map[string]interface{})
+		}
+		if _, ok := e.properties["key"]; !ok {
+			key := fmt.Sprintf("%s-%d", s, id.next())
+			e.properties["key"] = key
+		}
+	}
+
+	for _, c2 := range e.children {
+		if e2, ok := c2.(*Element); ok {
+			addMissingKeys(s, e2, id)
+		}
 	}
 }

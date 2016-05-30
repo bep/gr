@@ -113,3 +113,14 @@ func (s *style) Modify(element *Element) {
 func Style(name string, value interface{}) Modifier {
 	return &style{name: name, value: value}
 }
+
+type dynamicModifier int
+
+// Dynamic is a Modifier that marks the element as dynamic,
+// i.e. not static. This will turn off static features such as adding
+// missing keys.
+var Dynamic = new(dynamicModifier)
+
+func (d dynamicModifier) Modify(element *Element) {
+	element.dynamic = true
+}

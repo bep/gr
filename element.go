@@ -47,6 +47,12 @@ type Element struct {
 
 	elFactory elementFactory
 
+	// We assume that this element is static, and as such we help by
+	// adding auto generated keys when missing, to work around
+	// annyoing warnings in the console.
+	// This can be switched with the Dynamic modifier.
+	dynamic bool
+
 	// This is the actual ReactJS element.
 	// ReactElement, ReactText or a ReactFragment
 	element *js.Object
