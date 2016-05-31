@@ -17,6 +17,7 @@ limitations under the License.
 package gr
 
 import (
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -121,6 +122,20 @@ type Props map[string]interface{}
 
 // State holds the React state.
 type State map[string]interface{}
+
+// Call calls a func with the given name in Props with the given args.
+func (p Props) Call(name string, args ...interface{}) *js.Object {
+	f := p.Func(name)
+	return f(args...)
+}
+
+// Func returns the func with the given name in Props.
+func (p Props) Func(name string) func(args ...interface{}) *js.Object {
+	if o, ok := p[name]; ok {
+		return o.(func(args ...interface{}) *js.Object)
+	}
+	panic(fmt.Sprintf("func %s not found in properties", name))
+}
 
 // HasChanged reports whether the value of the property with any of the given keys has changed.
 func (p Props) HasChanged(nextProps Props, keys ...string) bool {
