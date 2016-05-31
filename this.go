@@ -99,9 +99,32 @@ func (s State) Int(key string) int {
 	return 0
 }
 
+// Bool is concenience method to lookup a bool value from state.
+func (s State) Bool(key string) bool {
+	if val, ok := s[key]; ok {
+		return val.(bool)
+	}
+	panic(fmt.Sprintf("State variable %q not found", key))
+}
+
 // SetState is a way of setting the state.
 func (t *This) SetState(s State) {
 	t.this.Call("setState", s)
+}
+
+// Refs returns the component references.
+// See https://facebook.github.io/react/docs/more-about-refs.html
+func (t *This) Refs() Refs {
+	refs := t.this.Get("refs").Interface()
+	return refs.(map[string]interface{})
+}
+
+// GetDOMNode returns the component if it has been mounted into the DOM.
+func (r Refs) GetDOMNode(key string) *js.Object {
+	if o, ok := r[key]; ok {
+		return reactDOM.Call("findDOMNode", o)
+	}
+	return nil
 }
 
 // ForceUpdate forces a re-render of the component.
@@ -122,6 +145,10 @@ type Props map[string]interface{}
 
 // State holds the React state.
 type State map[string]interface{}
+
+// Refs holds a reference to component references.
+// See https://facebook.github.io/react/docs/more-about-refs.html
+type Refs map[string]interface{}
 
 // Call calls a func with the given name in Props with the given args.
 func (p Props) Call(name string, args ...interface{}) *js.Object {
