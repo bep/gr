@@ -164,6 +164,29 @@ func (p Props) Func(name string) func(args ...interface{}) *js.Object {
 	panic(fmt.Sprintf("func %s not found in properties", name))
 }
 
+// Children represents a component's child component(s).
+// This is a fairly complex topic in Facebook's React, and more support may arrive here, eventually.
+// See https://facebook.github.io/react/tips/children-props-type.html
+type Children struct {
+	*js.Object
+}
+
+// Children returns this component's children, if any.
+func (t *This) Children() *Children {
+	o := t.this.Get("props").Get("children")
+
+	if o == js.Undefined {
+		return nil
+	}
+
+	return &Children{o}
+}
+
+// Element returns the children as an Element ready to render.
+func (c Children) Element() *Element {
+	return NewPreparedElement(c.Object)
+}
+
 // HasChanged reports whether the value of the property with any of the given keys has changed.
 func (p Props) HasChanged(nextProps Props, keys ...string) bool {
 	return hasChanged(p, nextProps, keys...)

@@ -19,6 +19,7 @@ package tests
 import (
 	"testing"
 
+	"fmt"
 	"github.com/bep/gr"
 	"github.com/bep/gr/el"
 	"github.com/bep/gr/evt"
@@ -53,5 +54,23 @@ func TestPropsFunc(t *testing.T) {
 
 	grt.Equal(t, "<button onClick={function()}>Clickable Button</button>", tree.String())
 	grt.Equal(t, 8, clickVal)
+
+}
+
+func TestPropsChildren(t *testing.T) {
+	buttons := make([]gr.Component, 3)
+
+	for i := 0; i < len(buttons); i++ {
+		buttons[i] = el.Button(gr.Text(fmt.Sprintf("B%d", i)))
+	}
+
+	comp := gr.New(gr.NewRenderer(func(this *gr.This) gr.Component {
+		return el.Div(this.Children().Element())
+	}))
+
+	elem := comp.CreateElement(nil, buttons...)
+	tree := grt.ShallowRender(elem)
+
+	grt.Equal(t, "<div><button>B0</button><button>B1</button><button>B2</button></div>", tree.String())
 
 }
