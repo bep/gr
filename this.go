@@ -119,7 +119,7 @@ func (t *This) Refs() Refs {
 	return refs.(map[string]interface{})
 }
 
-// GetDOMNode returns the component if it has been mounted into the DOM.
+// GetDOMNode returns the component from refs if it has been mounted into the DOM.
 func (r Refs) GetDOMNode(key string) *js.Object {
 	if o, ok := r[key]; ok {
 		return reactDOM.Call("findDOMNode", o)

@@ -476,6 +476,11 @@ func makeRenderFunc(s string, f func(this *This) Component) *js.Object {
 		that := NewThis(this)
 
 		comp := f(that)
+
+		if comp == nil {
+			return nil
+		}
+
 		// TODO(bep) refactor
 		if e, ok := comp.(*Element); ok {
 			e.This = that
@@ -486,6 +491,7 @@ func makeRenderFunc(s string, f func(this *This) Component) *js.Object {
 		if _, ok := comp.(Factory); ok {
 			panic("Render should return a ready-to-use Element.")
 		}
+
 		return comp.Node()
 	})
 }
