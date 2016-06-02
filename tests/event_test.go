@@ -28,7 +28,7 @@ import (
 func TestClickableButton(t *testing.T) {
 
 	clickCount := 0
-	clickListener := func(this *gr.This, event *gr.Event) {
+	clickListener := func(event *gr.Event) {
 		clickCount++
 	}
 

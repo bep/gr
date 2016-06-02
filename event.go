@@ -23,6 +23,7 @@ import (
 // Event represents a browser event. See https://developer.mozilla.org/en-US/docs/Web/Events
 type Event struct {
 	*js.Object
+	This *This
 }
 
 // Persist can be used to make sure the event survives Facebook React's recycling of
@@ -49,7 +50,7 @@ func (e *Event) Int(key string) int {
 // An EventListener can be attached to a HTML element to listen for events, mouse clicks etc.
 type EventListener struct {
 	name           string
-	listener       func(*This, *Event)
+	listener       func(*Event)
 	preventDefault bool
 	delegate       func(jsEvent *js.Object)
 }
@@ -62,11 +63,11 @@ func (l *EventListener) PreventDefault() *EventListener {
 
 // Listener is the signature for the func that needs to be implemented by the
 // listener, e.g. the clickHandler etc.
-type Listener func(*This, *Event)
+type Listener func(*Event)
 
 // NewEventListener creates a new EventListener. In most cases you will use the
 // predefined event listeners in the evt package.
-func NewEventListener(name string, listener func(*This, *Event)) *EventListener {
+func NewEventListener(name string, listener func(*Event)) *EventListener {
 	l := &EventListener{name: name, listener: listener}
 
 	return l

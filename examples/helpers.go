@@ -90,16 +90,18 @@ func Alert(classifier string, body gr.Modifier) *gr.Element {
 
 // ClickCounter is a reusable components to use in composition examples.
 // This is just copy-paste from the click counter example. Consider making something else.
-type ClickCounter int
+type ClickCounter struct {
+	*gr.This
+}
 
 // GetInitialState implements the StateInitializer interface.
-func (c ClickCounter) GetInitialState(this *gr.This) gr.State {
+func (c ClickCounter) GetInitialState() gr.State {
 	return gr.State{"counter": 0}
 }
 
 // Render implements the Renderer interface.
-func (c ClickCounter) Render(this *gr.This) gr.Component {
-	counter := this.State()["counter"]
+func (c ClickCounter) Render() gr.Component {
+	counter := c.State()["counter"]
 	message := fmt.Sprintf(" Click me! Number of clicks: %v", counter)
 
 	return el.Div(
@@ -109,18 +111,18 @@ func (c ClickCounter) Render(this *gr.This) gr.Component {
 			evt.Click(c.onClick)))
 }
 
-func (c ClickCounter) onClick(this *gr.This, event *gr.Event) {
-	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
+func (c ClickCounter) onClick(event *gr.Event) {
+	c.SetState(gr.State{"counter": c.State().Int("counter") + 1})
 }
 
 // ShouldComponentUpdate implements the ShouldComponentUpdate interface.
 func (c ClickCounter) ShouldComponentUpdate(
-	this *gr.This, nextProps gr.Props, nextState gr.State) bool {
+	nextProps gr.Props, nextState gr.State) bool {
 
-	return this.State().HasChanged(nextState, "counter")
+	return c.State().HasChanged(nextState, "counter")
 }
 
 // ComponentDidMount implements the ComponentDidMount interface.
-func (c ClickCounter) ComponentDidMount(this *gr.This) {
+func (c ClickCounter) ComponentDidMount() {
 	println("ClickCounter: ComponentDidMount")
 }

@@ -27,7 +27,18 @@ import (
 // This is named for what it represents: The this context representation from the
 // JavaScript side of the fence.
 type This struct {
-	this *js.Object
+	This *js.Object
+}
+
+// InitThis implements the ThisInitializer.
+func (t *This) InitThis(that *js.Object) {
+	t.This = that
+}
+
+// ThisInitializer must be implemented by a component if JavaScript's this is needed.
+// The simplest way of doing this is to just embed a This on the component struct.
+type ThisInitializer interface {
+	InitThis(this *js.Object)
 }
 
 // Props returns the properties set; what you would expect to find in
@@ -35,7 +46,7 @@ type This struct {
 func (t *This) Props() Props {
 
 	// TODO(bep) cache?
-	po := t.this.Get("props")
+	po := t.This.Get("props")
 	keys := js.Keys(po)
 	props := Props{}
 	for _, key := range keys {
@@ -62,7 +73,7 @@ func (t *This) Props() Props {
 // Context returns the context set; what you would expect to find in
 // this.context in React.
 func (t *This) Context() Context {
-	c := t.this.Get("context")
+	c := t.This.Get("context")
 
 	if c == js.Undefined {
 		panic("No context found")
@@ -84,7 +95,7 @@ func (t *This) Component(name string) Modifier {
 // State returns the state; what you would expect to find in
 // this.properties in React.
 func (t *This) State() State {
-	state := t.this.Get("state").Interface()
+	state := t.This.Get("state").Interface()
 	if state == nil {
 		return State{}
 	}
@@ -109,13 +120,13 @@ func (s State) Bool(key string) bool {
 
 // SetState is a way of setting the state.
 func (t *This) SetState(s State) {
-	t.this.Call("setState", s)
+	t.This.Call("setState", s)
 }
 
 // Refs returns the component references.
 // See https://facebook.github.io/react/docs/more-about-refs.html
 func (t *This) Refs() Refs {
-	refs := t.this.Get("refs").Interface()
+	refs := t.This.Get("refs").Interface()
 	return refs.(map[string]interface{})
 }
 
@@ -129,12 +140,12 @@ func (r Refs) GetDOMNode(key string) *js.Object {
 
 // ForceUpdate forces a re-render of the component.
 func (t *This) ForceUpdate() {
-	t.this.Call("forceUpdate")
+	t.This.Call("forceUpdate")
 }
 
 // NewThis creates a new This based on a JavaScript object representation.
 func NewThis(that *js.Object) *This {
-	return &This{this: that}
+	return &This{This: that}
 }
 
 // Context holds the React context.
@@ -173,7 +184,7 @@ type Children struct {
 
 // Children returns this component's children, if any.
 func (t *This) Children() *Children {
-	o := t.this.Get("props").Get("children")
+	o := t.This.Get("props").Get("children")
 
 	if o == js.Undefined {
 		return nil

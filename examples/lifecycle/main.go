@@ -41,62 +41,64 @@ func main() {
 	time.Sleep(10 * time.Second)
 }
 
-type lifecycle int
+type lifecycle struct {
+	*gr.This
+}
 
 // Implements the Renderer interface.
-func (l lifecycle) Render(this *gr.This) gr.Component {
+func (l lifecycle) Render() gr.Component {
 	log.Println("Render")
 	elem := el.Div(el.Header2(
 		gr.Text("Look at the lifecycle events in your console."),
-		gr.Style("color", this.State()["color"])))
+		gr.Style("color", l.State()["color"])))
 
 	return examples.Example("Lifecycle", elem)
 }
 
 // Implements the StateInitializer interface.
-func (l lifecycle) GetInitialState(this *gr.This) gr.State {
+func (l lifecycle) GetInitialState() gr.State {
 	log.Println("GetInitialState")
 	return gr.State{"color": "#ffcc00"}
 }
 
 // Implements the ChildContext interface.
-func (l lifecycle) GetChildContext(this *gr.This) gr.Context {
+func (l lifecycle) GetChildContext() gr.Context {
 	log.Println("GetChildContext")
 	return gr.Context{}
 }
 
 // Implements the ShouldComponentUpdate interface
-func (l lifecycle) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
-	return this.Props().HasChanged(next.Props, "prop")
+func (l lifecycle) ShouldComponentUpdate(next gr.Cops) bool {
+	return l.Props().HasChanged(next.Props, "prop")
 }
 
 // Implements the ComponentWillUpdate interface
-func (l lifecycle) ComponentWillUpdate(this *gr.This, next gr.Cops) {
+func (l lifecycle) ComponentWillUpdate(next gr.Cops) {
 	log.Println("ComponentWillUpdate")
 }
 
 // Implements the ComponentWillReceiveProps interface
-func (l lifecycle) ComponentWillReceiveProps(this *gr.This, data gr.Cops) {
+func (l lifecycle) ComponentWillReceiveProps(data gr.Cops) {
 	log.Println("ComponentWillReceiveProps")
 }
 
 // Implements the ComponentDidUpdate interface
-func (l lifecycle) ComponentDidUpdate(this *gr.This, data gr.Cops) {
+func (l lifecycle) ComponentDidUpdate(data gr.Cops) {
 	log.Println("ComponentDidUpdate")
 }
 
 // Implements the ComponentWillMount interface
-func (l lifecycle) ComponentWillMount(this *gr.This) {
+func (l lifecycle) ComponentWillMount() {
 	log.Println("ComponentWillMount")
 }
 
 // Implements the ComponentDidMount interface
-func (l lifecycle) ComponentDidMount(this *gr.This) {
+func (l lifecycle) ComponentDidMount() {
 	log.Println("ComponentDidMount")
 }
 
 // Implements the ComponentWillUnmount interface
-func (l lifecycle) ComponentWillUnmount(this *gr.This) {
+func (l lifecycle) ComponentWillUnmount() {
 	log.Println("ComponentWillUnmount")
 }
 

@@ -29,14 +29,16 @@ type gist struct {
 	Description string `json:"description"`
 }
 
-type userGists int
+type userGists struct {
+	*gr.This
+}
 
 // Implements the Renderer interface.
-func (g userGists) Render(this *gr.This) gr.Component {
+func (g userGists) Render() gr.Component {
 
 	elem := el.Div()
 
-	if s, ok := this.State()["gists"]; ok {
+	if s, ok := g.State()["gists"]; ok {
 		// The nice Gist type is lost once we entered the JavaScript world.
 		//
 		// What we get now is:
@@ -85,7 +87,7 @@ func tableRow(i interface{}) *gr.Element {
 }
 
 // Implements the ComponentDidMount interface
-func (g userGists) ComponentDidMount(this *gr.This) {
+func (g userGists) ComponentDidMount() {
 	println("ComponentDidMount")
 
 	var gists []gist
@@ -106,16 +108,16 @@ func (g userGists) ComponentDidMount(this *gr.This) {
 		panic(err)
 	}
 
-	this.SetState(gr.State{"gists": gists})
+	g.SetState(gr.State{"gists": gists})
 }
 
 // Implements the ComponentWillUnmount interface
-func (g userGists) ComponentWillUnmount(this *gr.This) {
+func (g userGists) ComponentWillUnmount() {
 	println("ComponentWillUnmount")
 	// TODO(bep): HTTP Cancelation
 }
 
 // Implements the ShouldComponentUpdate interface.
 func (g userGists) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
-	return this.State().HasChanged(next.State, "gists")
+	return g.State().HasChanged(next.State, "gists")
 }

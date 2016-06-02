@@ -35,39 +35,42 @@ func main() {
 	mainComponent.Render("react", gr.Props{})
 }
 
-type app int
+type app struct {
+	*gr.This
+}
 
 // Implements the Renderer interface.
-func (a app) Render(this *gr.This) gr.Component {
+func (a app) Render() gr.Component {
 	return el.Div(
 		el.Header1(gr.Text("Router")),
 		el.UnorderedList(
 			gr.CSS("nav", "nav-tabs"),
-			createLinkListItem(this, "/c1", "Tab #1"),
-			createLinkListItem(this, "/c2", "Tab #2"),
-			createLinkListItem(this, "/c3", "Tab #3"),
+			a.createLinkListItem("/c1", "Tab #1"),
+			a.createLinkListItem("/c2", "Tab #2"),
+			a.createLinkListItem("/c3", "Tab #3"),
 		),
 		// Receives the component in this.props.<name>
 		// If none found, a no-op is returned.
 		// TODO(bep) default if none found.
-		this.Component("main"),
-		this.Component("sub"),
+		a.Component("main"),
+		a.Component("sub"),
 	)
 }
 
-func createLinkListItem(this *gr.This, path, title string) gr.Modifier {
+func (a app) createLinkListItem(path, title string) gr.Modifier {
 	return el.ListItem(
-		grouter.MarkIfActive(this.Props(), path),
+		grouter.MarkIfActive(a.Props(), path),
 		attr.Role("presentation"),
 		grouter.Link(path, title))
 }
 
 type clickCounter struct {
+	*gr.This
 	title, color string
 }
 
 // Implements the StateInitializer interface.
-func (c clickCounter) GetInitialState(this *gr.This) gr.State {
+func (c clickCounter) GetInitialState() gr.State {
 	println(c.title, "GetInitialState")
 	return gr.State{
 		"counter": 0,
@@ -75,8 +78,8 @@ func (c clickCounter) GetInitialState(this *gr.This) gr.State {
 }
 
 // Implements the Renderer interface.
-func (c clickCounter) Render(this *gr.This) gr.Component {
-	counter := this.State()["counter"]
+func (c clickCounter) Render() gr.Component {
+	counter := c.State()["counter"]
 	message := fmt.Sprintf("%s: %v", c.title, counter)
 
 	elem := el.Div(
@@ -90,13 +93,13 @@ func (c clickCounter) Render(this *gr.This) gr.Component {
 	return examples.Example(strings.Title(message), elem)
 }
 
-func (c clickCounter) onClick(this *gr.This, event *gr.Event) {
-	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
+func (c clickCounter) onClick(event *gr.Event) {
+	c.SetState(gr.State{"counter": c.State().Int("counter") + 1})
 }
 
 // Implements the ShouldComponentUpdate interface.
 func (c clickCounter) ShouldComponentUpdate(
-	this *gr.This, next gr.Cops) bool {
+	next gr.Cops) bool {
 
-	return this.State().HasChanged(next.State, "counter")
+	return c.State().HasChanged(next.State, "counter")
 }

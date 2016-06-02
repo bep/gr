@@ -29,23 +29,25 @@ func main() {
 	})
 }
 
-type elapser int
+type elapser struct {
+	*gr.This
+}
 
 // Implements the Renderer interface.
-func (e elapser) Render(this *gr.This) gr.Component {
-	elapsed := this.Props()["elapsed"]
-	title := this.Props()["title"].(string) // TODO(bep cleanup props handling
+func (e elapser) Render() gr.Component {
+	elapsed := e.Props()["elapsed"]
+	title := e.Props()["title"].(string) // TODO(bep cleanup props handling
 
 	message := fmt.Sprintf("Go Timer has been successfully running for %v seconds.", elapsed)
 
 	internalCounter := examples.Alert("info", el.Strong(gr.Text(message)))
-	externalGlobalCounter := examples.Alert("warning", externalGlobalComponent.CreateElement(this.Props()))
-	externalModuleCounter := examples.Alert("danger", externalModuleComponent.CreateElement(this.Props()))
+	externalGlobalCounter := examples.Alert("warning", externalGlobalComponent.CreateElement(e.Props()))
+	externalModuleCounter := examples.Alert("danger", externalModuleComponent.CreateElement(e.Props()))
 
 	return examples.Panel(title, internalCounter, externalGlobalCounter, externalModuleCounter)
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (e elapser) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
-	return this.Props().HasChanged(next.Props, "elapsed")
+func (e elapser) ShouldComponentUpdate(next gr.Cops) bool {
+	return e.Props().HasChanged(next.Props, "elapsed")
 }

@@ -24,13 +24,15 @@ func main() {
 	})
 }
 
-type elapser int
+type elapser struct {
+	*gr.This
+}
 
 var clickCounter = gr.New(new(examples.ClickCounter))
 
 // Implements the Renderer interface.
-func (e elapser) Render(this *gr.This) gr.Component {
-	elapsed := this.Props()["elapsed"]
+func (e elapser) Render() gr.Component {
+	elapsed := e.Props()["elapsed"]
 	message := fmt.Sprintf("React has been successfully running for '%v' seconds.", elapsed)
 	elem := el.Div(
 		examples.Alert("info", el.Strong(gr.Text(message))),
@@ -41,10 +43,10 @@ func (e elapser) Render(this *gr.This) gr.Component {
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (e elapser) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
-	return this.Props().HasChanged(next.Props, "elapsed")
+func (e elapser) ShouldComponentUpdate(next gr.Cops) bool {
+	return e.Props().HasChanged(next.Props, "elapsed")
 }
 
-func (e elapser) ComponentDidMount(this *gr.This) {
+func (e elapser) ComponentDidMount() {
 	println("Elapser: ComponentDidMount")
 }

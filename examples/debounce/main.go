@@ -18,11 +18,13 @@ func main() {
 
 }
 
-type mouseTracker int
+type mouseTracker struct {
+	*gr.This
+}
 
 // Implements the Renderer interface.
-func (m mouseTracker) Render(this *gr.This) gr.Component {
-	state := this.State()
+func (m mouseTracker) Render() gr.Component {
+	state := m.State()
 	x := state["mouseX"]
 	y := state["mouseY"]
 	counter := state["counter"]
@@ -51,19 +53,18 @@ func (m mouseTracker) Render(this *gr.This) gr.Component {
 	return examples.Example("Debounce", elem)
 }
 
-func (m mouseTracker) GetInitialState(this *gr.This) gr.State {
+func (m mouseTracker) GetInitialState() gr.State {
 	return gr.State{"mouseX": 0, "mouseY": 0, "counter": 0}
 }
 
-func (m mouseTracker) ShouldComponentUpdate(
-	this *gr.This, next gr.Cops) bool {
-	return this.State().HasChanged(next.State, "mouseX", "mouseY")
+func (m mouseTracker) ShouldComponentUpdate(next gr.Cops) bool {
+	return m.State().HasChanged(next.State, "mouseX", "mouseY")
 }
 
 var (
 	// Only update the UI when no new events have been received for >= 200 ms.
 	debouncer, _                      = debounce.New(200 * time.Millisecond)
-	debounceMouseListener gr.Listener = func(this *gr.This, e *gr.Event) {
+	debounceMouseListener gr.Listener = func(e *gr.Event) {
 
 		// React recycles events - so extract early.
 		// For the mouse API, see https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent
@@ -72,8 +73,8 @@ var (
 		clientY := e.Int("screenY")
 
 		f := func() {
-			counter := this.State().Int("counter") + 1
-			this.SetState(gr.State{"mouseX": clientX, "mouseY": clientY, "counter": counter})
+			counter := e.This.State().Int("counter") + 1
+			e.This.SetState(gr.State{"mouseX": clientX, "mouseY": clientY, "counter": counter})
 		}
 
 		debouncer(f)

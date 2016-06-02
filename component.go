@@ -23,6 +23,7 @@ import (
 
 	"github.com/bep/gr/support"
 	"github.com/gopherjs/gopherjs/js"
+	"reflect"
 )
 
 var (
@@ -180,7 +181,7 @@ type simpleRenderer struct {
 }
 
 // Implements the Renderer interface.
-func (s simpleRenderer) Render(this *This) Component {
+func (s simpleRenderer) Render() Component {
 	return s.c
 }
 
@@ -197,6 +198,7 @@ type reactClass struct {
 	displayName string `js:"displayName"`
 
 	render            *js.Object `js:"render"`
+	getDefaultProps   *js.Object `js:"getDefaultProps"`
 	getInitialState   *js.Object `js:"getInitialState"`
 	getChildContext   *js.Object `js:"getChildContext"`
 	childContextTypes js.M       `js:"childContextTypes"`
@@ -212,17 +214,51 @@ type reactClass struct {
 }
 
 type delegateRenderer struct {
-	delegate func(this *This) Component
+	delegate func() Component
 }
 
 // Render implements the Renderer interface.
-func (d delegateRenderer) Render(this *This) Component {
-	return d.delegate(this)
+func (d delegateRenderer) Render() Component {
+	return d.delegate()
 }
 
 // NewRenderer creates a Renderer with the provided func as the implementation.
-func NewRenderer(renderFunc func(this *This) Component) Renderer {
+func NewRenderer(renderFunc func() Component) Renderer {
 	return delegateRenderer{renderFunc}
+}
+
+func extractThisInitializer(r Renderer) ThisInitializer {
+	var thisInit ThisInitializer
+
+	rv := reflect.ValueOf(r)
+
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+
+	rt := rv.Type()
+
+	if rt.Kind() == reflect.Struct {
+		for i := 0; i < rt.NumField(); i++ {
+			fieldVal := rv.Field(i)
+			if fieldVal.CanInterface() {
+				if init, ok := fieldVal.Interface().(ThisInitializer); ok {
+					if fieldVal.IsNil() {
+						newVal := reflect.New(rt.Field(i).Type.Elem())
+						fieldVal.Set(newVal)
+						thisInit = newVal.Interface().(ThisInitializer)
+					} else {
+						thisInit = init
+					}
+					break
+				}
+			}
+
+		}
+
+	}
+
+	return thisInit
 }
 
 // New creates a new Component given a Renderer and optinal option(s).
@@ -241,14 +277,22 @@ func New(r Renderer, options ...Option) *ReactComponent {
 	//classProps.Set("mixins", nil) https://github.com/bep/gr/issues/24
 	//classProps.Set("statics", nil) https://github.com/bep/gr/issues/25
 
-	//root.reactClass.contextTypes = js.M{"color": react.Get("PropTypes").Get("string"), "id": react.Get("PropTypes").Get("number")}
+	// This is the first lifecycle method with 'this' provided.
+	// We use this to init the this object if provided.
+
+	thisInit := extractThisInitializer(r)
 
 	// Every component needs to render itself.
 	root.reactClass.render = makeRenderFunc(displayName, r.Render)
 
 	// Optional lifecycle implementations below.
 	if v, ok := r.(StateInitializer); ok {
-		root.reactClass.getInitialState = makeStateFunc(v.GetInitialState)
+		root.reactClass.getInitialState = makeStateFunc(thisInit, v.GetInitialState)
+	} else if thisInit != nil {
+		root.reactClass.getInitialState = js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+			thisInit.InitThis(this)
+			return nil
+		})
 	}
 
 	if v, ok := r.(ChildContextProvider); ok {
@@ -369,28 +413,28 @@ func (r *ReactComponent) Render(elementID string, props Props) {
 	reactDOM.Call("render", elem.Node(), container)
 }
 
-func makeComponentUpdateFunc(f func(this *This, c Cops) bool) *js.Object {
+func makeComponentUpdateFunc(f func(c Cops) bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		return f(extractComponentUpdateArgs(this, arguments))
+		return f(extractComponentUpdateArgs(arguments))
 	})
 }
 
-func makeComponentUpdateVoidFunc(f func(this *This, c Cops)) *js.Object {
+func makeComponentUpdateVoidFunc(f func(c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		f(extractComponentUpdateArgs(this, arguments))
+		f(extractComponentUpdateArgs(arguments))
 		return nil
 	})
 }
 
-func makeComponentPropertyReceiverFunc(f func(this *This, c Cops)) *js.Object {
+func makeComponentPropertyReceiverFunc(f func(c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		that, data := extractComponentUpdateArgs(this, arguments)
-		f(that, data)
+		data := extractComponentUpdateArgs(arguments)
+		f(data)
 		return nil
 	})
 }
 
-func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This, Cops) {
+func extractComponentUpdateArgs(arguments []*js.Object) Cops {
 	var (
 		props   Props
 		state   State
@@ -407,37 +451,38 @@ func extractComponentUpdateArgs(this *js.Object, arguments []*js.Object) (*This,
 		context = arguments[2].Interface().(map[string]interface{})
 	}
 
-	that := NewThis(this)
-
-	return that, Cops{Props: props, State: state, Context: context}
+	return Cops{Props: props, State: state, Context: context}
 }
 
-func makeVoidFunc(f func(this *This), assumeBlocking bool) *js.Object {
+func makeVoidFunc(f func(), assumeBlocking bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 		if assumeBlocking {
 			go func() {
-				f(NewThis(this))
+				f()
 			}()
 		} else {
-			f(NewThis(this))
+			f()
 		}
 		return nil
 	})
 }
 
-func makeStateFunc(f func(this *This) State) *js.Object {
+func makeStateFunc(thisInit ThisInitializer, f func() State) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		return f(NewThis(this))
+		if thisInit != nil {
+			thisInit.InitThis(this)
+		}
+		return f()
 	})
 }
 
-func makeChildContextFunc(f func(this *This) Context) (*js.Object, js.M) {
+func makeChildContextFunc(f func() Context) (*js.Object, js.M) {
 
 	getChildContext := js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		return f(NewThis(this))
+		return f()
 	})
 
-	childContextTypes := extractPropTypesFromTemplate(f(nil))
+	childContextTypes := extractPropTypesFromTemplate(f())
 
 	return getChildContext, childContextTypes
 }
@@ -470,12 +515,10 @@ func (i *incrementor) next() int {
 	return i.counter
 }
 
-func makeRenderFunc(s string, f func(this *This) Component) *js.Object {
+func makeRenderFunc(s string, f func() Component) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 
-		that := NewThis(this)
-
-		comp := f(that)
+		comp := f()
 
 		if comp == nil {
 			return nil
@@ -483,8 +526,7 @@ func makeRenderFunc(s string, f func(this *This) Component) *js.Object {
 
 		// TODO(bep) refactor
 		if e, ok := comp.(*Element); ok {
-			e.This = that
-			addEventListeners(comp, that)
+			addEventListeners(comp, NewThis(this))
 			idFactory := &incrementor{}
 			addMissingKeys(s, e, idFactory)
 		}
@@ -503,7 +545,7 @@ func addEventListeners(c Component, that *This) {
 				if l.preventDefault {
 					event.Call("preventDefault")
 				}
-				l.listener(that, &Event{Object: event})
+				l.listener(&Event{Object: event, This: that})
 			}
 
 			e.properties[l.name] = l.delegate

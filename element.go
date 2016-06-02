@@ -56,8 +56,6 @@ type Element struct {
 	// This is the actual ReactJS element.
 	// ReactElement, ReactText or a ReactFragment
 	element *js.Object
-
-	*This
 }
 
 // NewElement creates a new Element with the given tag.

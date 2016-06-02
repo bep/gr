@@ -21,6 +21,13 @@ func Equal(t *testing.T, expected, actual interface{}) {
 	}
 }
 
+// NotEqual is a test assertion used to check non-equality.
+func NotEqual(t *testing.T, v1, v2 interface{}) {
+	if v1 == v2 {
+		t.Errorf("Assert mismatch:\n%v\n%v", v1, v2)
+	}
+}
+
 // NotNil is a test assertion that checks for both nil values and js.Undefined.
 func NotNil(t *testing.T, val interface{}) {
 	if isNil(val) {

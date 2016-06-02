@@ -35,7 +35,7 @@ const exportedTestComponent = "GrtTest"
 func TestNewSimpleRenderer(t *testing.T) {
 	button := el.Button(gr.Text("Shiny Button"))
 	renderer := gr.NewSimpleRenderer(button)
-	grt.Equal(t, button, renderer.Render(&gr.This{}))
+	grt.Equal(t, button, renderer.Render())
 }
 
 func TestNewSimpleComponent(t *testing.T) {
@@ -208,7 +208,7 @@ func TestForceUpdate(t *testing.T) {
 	grt.Equal(t, `<div><button style={{"color": "indigo"}}>Initial Button</button></div>`,
 		r.String())
 
-	//component.printVisits()
+	component.printVisits()
 	grt.Equal(t, 10, component.totalVisits())
 	grt.Equal(t, 1, component.visitCounter("ComponentWillUpdate"))
 	grt.Equal(t, 2, component.visitCounter("Render"))
@@ -253,6 +253,7 @@ func (c *testCustomComponent) Node() *js.Object {
 }
 
 type testCompositeComponent struct {
+	*gr.This
 	c1, c2, c3 gr.Factory
 }
 
@@ -264,9 +265,9 @@ func newTestCompositeComponent() *testCompositeComponent {
 	}
 }
 
-func (c *testCompositeComponent) Render(this *gr.This) gr.Component {
+func (c *testCompositeComponent) Render() gr.Component {
 	return el.Div(
-		el.Header1(gr.Text(this.Props()["text"])),
+		el.Header1(gr.Text(c.This.Props()["text"])),
 		c.c1.CreateElement(gr.Props{"text": "c1"}),
 		c.c2.CreateElement(gr.Props{"text": "c2"}),
 		c.c3.CreateElement(gr.Props{"text": "c3"}),
@@ -285,26 +286,29 @@ type testParentWithContext struct {
 	child gr.Factory
 }
 
-func (l *testParentWithContext) Render(this *gr.This) gr.Component {
+func (l *testParentWithContext) Render() gr.Component {
 	return el.Div(
 		l.child.CreateElement(nil),
 	)
 }
 
-func (l *testParentWithContext) GetChildContext(this *gr.This) gr.Context {
+func (l *testParentWithContext) GetChildContext() gr.Context {
 	return gr.Context{"color": "blue", "id": 62}
 }
 
-type testChildWithContext int
+type testChildWithContext struct {
+	*gr.This
+}
 
-func (l *testChildWithContext) Render(this *gr.This) gr.Component {
+func (l *testChildWithContext) Render() gr.Component {
 	return el.Button(
-		gr.Style("color", this.Context()["color"]),
-		attr.ID(this.Context()["id"]),
+		gr.Style("color", l.This.Context()["color"]),
+		attr.ID(l.This.Context()["id"]),
 	)
 }
 
 type testLifecycler struct {
+	*gr.This
 	color  string
 	visits map[string]int
 }
@@ -346,8 +350,9 @@ func (l *testLifecycler) visitCounter(m string) int {
 	return 0
 }
 
-func (l *testLifecycler) Render(this *gr.This) gr.Component {
+func (l *testLifecycler) Render() gr.Component {
 	l.visited("Render")
+	this := l.This
 	color := this.State()["color"]
 	text := this.Props()["text"]
 	elem := el.Div(
@@ -357,40 +362,40 @@ func (l *testLifecycler) Render(this *gr.This) gr.Component {
 	return elem
 }
 
-func (l *testLifecycler) GetInitialState(this *gr.This) gr.State {
+func (l *testLifecycler) GetInitialState() gr.State {
 	l.visited("GetInitialState")
 	return gr.State{"color": l.color}
 }
 
-func (l *testLifecycler) GetChildContext(this *gr.This) gr.Context {
+func (l *testLifecycler) GetChildContext() gr.Context {
 	label := "GetChildContext"
-	if this == nil {
+	if l.This.This == nil {
 		label += "-init"
 	}
 	l.visited(label)
 	return gr.Context{"color": l.color}
 }
 
-func (l *testLifecycler) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
+func (l *testLifecycler) ShouldComponentUpdate(next gr.Cops) bool {
 	l.visited("ShouldComponentUpdate")
-	return this.Props().HasChanged(next.Props, "text")
+	return l.This.Props().HasChanged(next.Props, "text")
 }
-func (l *testLifecycler) ComponentWillUpdate(this *gr.This, next gr.Cops) {
+func (l *testLifecycler) ComponentWillUpdate(next gr.Cops) {
 	l.visited("ComponentWillUpdate")
 }
-func (l *testLifecycler) ComponentWillReceiveProps(this *gr.This, data gr.Cops) {
+func (l *testLifecycler) ComponentWillReceiveProps(data gr.Cops) {
 	l.visited("ComponentWillReceiveProps")
 }
-func (l *testLifecycler) ComponentDidUpdate(this *gr.This, prev gr.Cops) {
+func (l *testLifecycler) ComponentDidUpdate(prev gr.Cops) {
 	l.visited("ComponentDidUpdate")
 }
-func (l *testLifecycler) ComponentWillMount(this *gr.This) {
+func (l *testLifecycler) ComponentWillMount() {
 	l.visited("ComponentWillMount")
 }
-func (l *testLifecycler) ComponentWillUnmount(this *gr.This) {
+func (l *testLifecycler) ComponentWillUnmount() {
 	l.visited("ComponentWillUnmount")
 }
-func (l *testLifecycler) ComponentDidMount(this *gr.This) {
+func (l *testLifecycler) ComponentDidMount() {
 	l.visited("ComponentDidMount")
 	return
 }

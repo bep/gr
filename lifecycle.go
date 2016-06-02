@@ -44,12 +44,12 @@ type Cops struct {
 
 // Renderer is the core interface used to render a Element.
 type Renderer interface {
-	Render(this *This) Component
+	Render() Component
 }
 
 // StateInitializer sets up the initial state.
 type StateInitializer interface {
-	GetInitialState(this *This) State
+	GetInitialState() State
 }
 
 // ChildContextProvider provides the context for the children.
@@ -64,45 +64,45 @@ type StateInitializer interface {
 //
 // See https://facebook.github.io/react/docs/context.html
 type ChildContextProvider interface {
-	GetChildContext(this *This) Context
+	GetChildContext() Context
 }
 
 // ShouldComponentUpdate gets invoked before rendering when new props or state are being received.
 // This is not called for the initial render or when forceUpdate is used.
 type ShouldComponentUpdate interface {
-	ShouldComponentUpdate(this *This, next Cops) bool
+	ShouldComponentUpdate(next Cops) bool
 }
 
 // ComponentWillUpdate gets invoked immediately before rendering when new props or state are being received.
 // This is not called for the initial render.
 type ComponentWillUpdate interface {
-	ComponentWillUpdate(this *This, next Cops)
+	ComponentWillUpdate(next Cops)
 }
 
 // ComponentWillReceiveProps gets invoked when a component is receiving new props.
 // This method is not called for the initial render.
 type ComponentWillReceiveProps interface {
-	ComponentWillReceiveProps(this *This, next Cops)
+	ComponentWillReceiveProps(next Cops)
 }
 
 // ComponentDidUpdate gets invoked immediately after the component's updates are flushed to the DOM.
 // This method is not called for the initial render.
 type ComponentDidUpdate interface {
-	ComponentDidUpdate(this *This, prev Cops)
+	ComponentDidUpdate(prev Cops)
 }
 
 // ComponentWillMount get invoked once, both on the client and server, immediately before the initial rendering occurs.
 type ComponentWillMount interface {
-	ComponentWillMount(this *This)
+	ComponentWillMount()
 }
 
 // ComponentWillUnmount gets invoked immediately before a component is unmounted from the DOM.
 type ComponentWillUnmount interface {
-	ComponentWillUnmount(this *This)
+	ComponentWillUnmount()
 }
 
 // ComponentDidMount gets invoked once, only on the client (not on the server),
 // immediately after the initial rendering occurs.
 type ComponentDidMount interface {
-	ComponentDidMount(this *This)
+	ComponentDidMount()
 }
