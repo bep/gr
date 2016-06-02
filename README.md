@@ -7,7 +7,7 @@
 		
 [GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
 
-**NOTE: Still very early and not production ready.**
+**NOTE: Still early and not production ready.**
 
 ## Examples
 
@@ -33,16 +33,18 @@ func main() {
 	})
 }
 
-type clickCounter int
+type clickCounter struct {
+	*gr.This
+}
 
 // Implements the StateInitializer interface.
-func (c clickCounter) GetInitialState(this *gr.This) gr.State {
+func (c clickCounter) GetInitialState() gr.State {
 	return gr.State{"counter": 0}
 }
 
 // Implements the Renderer interface.
-func (c clickCounter) Render(this *gr.This) gr.Component {
-	counter := this.State()["counter"]
+func (c clickCounter) Render() gr.Component {
+	counter := c.State()["counter"]
 	message := fmt.Sprintf(" Click me! Number of clicks: %v", counter)
 
 	elem := el.Div(
@@ -55,13 +57,13 @@ func (c clickCounter) Render(this *gr.This) gr.Component {
 	return examples.Example("Click Counter", elem)
 }
 
-func (c clickCounter) onClick(this *gr.This, event *gr.Event) {
-	this.SetState(gr.State{"counter": this.State().Int("counter") + 1})
+func (c clickCounter) onClick(event *gr.Event) {
+	c.SetState(gr.State{"counter": c.State().Int("counter") + 1})
 }
 
 // Implements the ShouldComponentUpdate interface.
-func (c clickCounter) ShouldComponentUpdate(this *gr.This, next gr.Cops) bool {
-	return this.State().HasChanged(next.State, "counter")
+func (c clickCounter) ShouldComponentUpdate(next gr.Cops) bool {
+	return c.State().HasChanged(next.State, "counter")
 }
 ```
 
