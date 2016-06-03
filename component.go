@@ -227,41 +227,7 @@ func NewRenderer(renderFunc func() Component) Renderer {
 	return delegateRenderer{renderFunc}
 }
 
-func extractThisInitializer(r Renderer) ThisInitializer {
-	var thisInit ThisInitializer
-
-	rv := reflect.ValueOf(r)
-
-	if rv.Kind() == reflect.Ptr {
-		rv = rv.Elem()
-	}
-
-	rt := rv.Type()
-
-	if rt.Kind() == reflect.Struct {
-		for i := 0; i < rt.NumField(); i++ {
-			fieldVal := rv.Field(i)
-			if fieldVal.CanInterface() {
-				if init, ok := fieldVal.Interface().(ThisInitializer); ok {
-					if fieldVal.IsNil() {
-						newVal := reflect.New(rt.Field(i).Type.Elem())
-						fieldVal.Set(newVal)
-						thisInit = newVal.Interface().(ThisInitializer)
-					} else {
-						thisInit = init
-					}
-					break
-				}
-			}
-
-		}
-
-	}
-
-	return thisInit
-}
-
-// New creates a new Component given a Renderer and optinal option(s).
+// New creates a new Component given a Renderer and optional option(s).
 // Note that the Renderer is the minimum interface that needs to be implemented,
 // but New will perform interface upgrades for other lifecycle interfaces.
 func New(r Renderer, options ...Option) *ReactComponent {
@@ -271,11 +237,10 @@ func New(r Renderer, options ...Option) *ReactComponent {
 	displayName := strings.TrimLeft(typ, "*")
 	root.reactClass.displayName = displayName
 
-	//classProps.Set("getDefaultProps", https://github.com/bep/gr/issues/23
-	//	js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} { return nil }))
-	//classProps.Set("propTypes", make(map[string]interface{}))
-	//classProps.Set("mixins", nil) https://github.com/bep/gr/issues/24
-	//classProps.Set("statics", nil) https://github.com/bep/gr/issues/25
+	// TODO(bep)
+	// getDefaultProps propTypes https://github.com/bep/gr/issues/23
+	// mixins https://github.com/bep/gr/issues/24
+	// statics  https://github.com/bep/gr/issues/25
 
 	// This is the first lifecycle method with 'this' provided.
 	// We use this to init the this object if provided.
@@ -377,6 +342,15 @@ func (r *ReactComponent) Node() *js.Object {
 	return r.node
 }
 
+// Render the Component in the DOM with the given element ID and props.
+func (r *ReactComponent) Render(elementID string, props Props) {
+	container := js.Global.Get("document").Call("getElementById", elementID)
+	elem := r.CreateElement(props)
+
+	// TODO(bep) evaluate if the need the "this" returned on render.
+	reactDOM.Call("render", elem.Node(), container)
+}
+
 // CreateElement implements the Factory interface.
 // TODO(bep) consolidate and clean
 func (r *ReactComponent) CreateElement(props Props, children ...Component) *Element {
@@ -404,13 +378,39 @@ func createElementElementFactory(r *ReactComponent) func(e *Element) *js.Object 
 	}
 }
 
-// Render the Component in the DOM with the given element ID and props.
-func (r *ReactComponent) Render(elementID string, props Props) {
-	container := js.Global.Get("document").Call("getElementById", elementID)
-	elem := r.CreateElement(props)
+func extractThisInitializer(r Renderer) ThisInitializer {
+	var thisInit ThisInitializer
 
-	// TODO(bep) evaluate if the need the "this" returned on render.
-	reactDOM.Call("render", elem.Node(), container)
+	rv := reflect.ValueOf(r)
+
+	if rv.Kind() == reflect.Ptr {
+		rv = rv.Elem()
+	}
+
+	rt := rv.Type()
+
+	if rt.Kind() == reflect.Struct {
+		for i := 0; i < rt.NumField(); i++ {
+			fv := rv.Field(i)
+			if fv.CanInterface() {
+				if init, ok := fv.Interface().(ThisInitializer); ok {
+					if fv.IsNil() {
+						newVal := reflect.New(rt.Field(i).Type.Elem())
+						fv.Set(newVal)
+						thisInit = newVal.Interface().(ThisInitializer)
+					} else {
+						thisInit = init
+					}
+					// We should maybe check for others and report an error, but for now the first one wins.
+					break
+				}
+			}
+
+		}
+
+	}
+
+	return thisInit
 }
 
 func makeComponentUpdateFunc(f func(c Cops) bool) *js.Object {
@@ -506,11 +506,11 @@ func extractPropTypesFromTemplate(t map[string]interface{}) js.M {
 	return propTypes
 }
 
-type incrementor struct {
+type incrementer struct {
 	counter int
 }
 
-func (i *incrementor) next() int {
+func (i *incrementer) next() int {
 	i.counter++
 	return i.counter
 }
@@ -527,7 +527,7 @@ func makeRenderFunc(s string, f func() Component) *js.Object {
 		// TODO(bep) refactor
 		if e, ok := comp.(*Element); ok {
 			addEventListeners(comp, NewThis(this))
-			idFactory := &incrementor{}
+			idFactory := &incrementer{}
 			addMissingKeys(s, e, idFactory)
 		}
 		if _, ok := comp.(Factory); ok {
@@ -578,7 +578,7 @@ func (r *ReactComponent) handleOptionsOnPrepare() {
 	}
 }
 
-func addMissingKeys(s string, e *Element, id *incrementor) {
+func addMissingKeys(s string, e *Element, id *incrementer) {
 
 	if !e.dynamic {
 		if e.properties == nil {

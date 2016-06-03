@@ -208,7 +208,7 @@ func TestForceUpdate(t *testing.T) {
 	grt.Equal(t, `<div><button style={{"color": "indigo"}}>Initial Button</button></div>`,
 		r.String())
 
-	component.printVisits()
+	//component.printVisits()
 	grt.Equal(t, 10, component.totalVisits())
 	grt.Equal(t, 1, component.visitCounter("ComponentWillUpdate"))
 	grt.Equal(t, 2, component.visitCounter("Render"))
