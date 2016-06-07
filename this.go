@@ -92,6 +92,12 @@ func (t *This) Component(name string) Modifier {
 	return Discard
 }
 
+
+// IsMounted reports whether this component is mounted.
+func (t *This) IsMounted() bool {
+	return t.This.Call("isMounted").Bool()
+}
+
 // State returns the state; what you would expect to find in
 // this.properties in React.
 func (t *This) State() State {
@@ -194,7 +200,7 @@ func (t *This) Children() *Children {
 }
 
 // Element returns the children as an Element ready to render.
-func (c Children) Element() *Element {
+func (c *Children) Element() *Element {
 	return NewPreparedElement(c.Object)
 }
 
