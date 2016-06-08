@@ -37,7 +37,8 @@ var (
 // Element represents a builder for a ReactElement.
 // An Element can be a simple text node or a HTML element with children, attributes etc.
 type Element struct {
-	tag            string
+	tag string
+
 	properties     map[string]interface{}
 	style          map[string]interface{}
 	eventListeners []*EventListener

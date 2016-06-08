@@ -38,7 +38,7 @@ func (g userGists) Render() gr.Component {
 
 	elem := el.Div()
 
-	if s, ok := g.State()["gists"]; ok {
+	if s := g.State().Interface("gists"); s != nil {
 		// The nice Gist type is lost once we entered the JavaScript world.
 		//
 		// What we get now is:

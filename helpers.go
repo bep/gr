@@ -75,7 +75,10 @@ func toString(i interface{}) string {
 		if v == js.Undefined {
 			return ""
 		}
-		panic("Invalid string type")
+		// TODO(bep) v.Interface() fails with a infinite loop here for strings returned from React.
+		// TODO(bep)  Try to make a standalone test that fails.
+		o := v.Get("object")
+		return o.String()
 	}
 	return fmt.Sprint(i)
 }
@@ -100,4 +103,22 @@ func toInt(i interface{}) int {
 	default:
 		panic(fmt.Sprintf("Unhandled number type: %T", v))
 	}
+}
+
+func objectToMap(o *js.Object) map[string]interface{} {
+
+	m := make(map[string]interface{})
+
+	if o == js.Undefined {
+		return m
+	}
+
+	for _, k := range js.Keys(o) {
+		kv := o.Get(k)
+
+		m[k] = kv
+
+	}
+
+	return m
 }

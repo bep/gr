@@ -85,7 +85,7 @@ func TestNew(t *testing.T) {
 
 	this := r.This()
 
-	grt.Equal(t, "blue", this.State()["color"])
+	grt.Equal(t, "blue", this.State().String("color"))
 
 	// Rerender with new props
 	newProps := gr.Props{"text": "Updated Button"}

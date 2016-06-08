@@ -442,13 +442,14 @@ func extractComponentUpdateArgs(arguments []*js.Object) Cops {
 	)
 
 	if len(arguments) > 0 && arguments[0] != nil {
-		props = arguments[0].Interface().(map[string]interface{})
+		props = objectToMap(arguments[0])
+
 	}
 	if len(arguments) > 1 && arguments[1] != nil {
-		state = arguments[1].Interface().(map[string]interface{})
+		state = objectToMap(arguments[1])
 	}
 	if len(arguments) > 2 && arguments[2] != nil {
-		context = arguments[2].Interface().(map[string]interface{})
+		context = objectToMap(arguments[2])
 	}
 
 	return Cops{Props: props, State: state, Context: context}
@@ -516,6 +517,7 @@ func (i *incrementer) next() int {
 }
 
 func makeRenderFunc(s string, f func() Component) *js.Object {
+
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
 
 		comp := f()

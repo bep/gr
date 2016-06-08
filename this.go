@@ -18,8 +18,6 @@ package gr
 
 import (
 	"fmt"
-	"reflect"
-	"strings"
 
 	"github.com/gopherjs/gopherjs/js"
 )
@@ -41,57 +39,26 @@ type ThisInitializer interface {
 	InitThis(this *js.Object)
 }
 
-// Props returns the properties set; what you would expect to find in
-// this.properties in React.
+// Props returns the properties set; this is what you would expect to find in
+// this.props in React.
 func (t *This) Props() Props {
-
-	// TODO(bep) cache?
-	po := t.This.Get("props")
-	keys := js.Keys(po)
-	props := Props{}
-	for _, key := range keys {
-		o := po.Get(key)
-		if o == js.Undefined {
-			panic("Got undefined object in props: " + key)
-		}
-		if o == nil {
-			continue
-		}
-		if strings.Contains(o.Get("$$typeof").String(), "react.element") {
-			// React elements can contain circular refs that goes into
-			// Uncaught RangeError: Maximum call stack size exceeded
-			// So, wrap them.
-			props[key] = js.MakeWrapper(po.Get(key))
-		} else {
-			props[key] = o.Interface()
-		}
-	}
-
-	return props
+	return objectToMap(t.This.Get("props"))
 }
 
 // Context returns the context set; what you would expect to find in
 // this.context in React.
 func (t *This) Context() Context {
-	c := t.This.Get("context")
-
-	if c == js.Undefined {
-		panic("No context found")
-	}
-
-	return c.Interface().(map[string]interface{})
+	return objectToMap(t.This.Get("context"))
 }
 
 // Component returns a component stored in props by its name.
 func (t *This) Component(name string) Modifier {
 	props := t.Props()
 	if main, ok := props[name]; ok {
-		comp := main.(*js.Object).Interface().(*js.Object)
-		return NewPreparedElement(comp)
+		return NewPreparedElement(main.(*js.Object))
 	}
 	return Discard
 }
-
 
 // IsMounted reports whether this component is mounted.
 func (t *This) IsMounted() bool {
@@ -101,30 +68,42 @@ func (t *This) IsMounted() bool {
 // State returns the state; what you would expect to find in
 // this.properties in React.
 func (t *This) State() State {
-	state := t.This.Get("state").Interface()
-	if state == nil {
-		return State{}
-	}
-	return state.(map[string]interface{})
+	return objectToMap(t.This.Get("state"))
 }
 
-// Int is concenience method to lookup a int value from state.
+// Int is convenience method to lookup a int value from state.
 func (s State) Int(key string) int {
 	if val, ok := s[key]; ok {
-		return int(val.(float64))
+		return val.(*js.Object).Int()
 	}
 	return 0
 }
 
-// Bool is concenience method to lookup a bool value from state.
+// Bool is convenience method to lookup a bool value from state.
 func (s State) Bool(key string) bool {
 	if val, ok := s[key]; ok {
-		return val.(bool)
+		return val.(*js.Object).Bool()
 	}
 	panic(fmt.Sprintf("State variable %q not found", key))
 }
 
-// SetState is a way of setting the state.
+// String is convenience method to lookup a bool value from state.
+func (s State) String(key string) string {
+	if val, ok := s[key]; ok {
+		return val.(*js.Object).String()
+	}
+	return ""
+}
+
+// Interface is a convenience method to lookup an interface value from state.
+func (s State) Interface(key string) interface{} {
+	if val, ok := s[key]; ok {
+		return val.(*js.Object).Interface()
+	}
+	return nil
+}
+
+// SetState sets the state with a map of Go interface{} values.
 func (t *This) SetState(s State) {
 	t.This.Call("setState", s)
 }
@@ -132,8 +111,7 @@ func (t *This) SetState(s State) {
 // Refs returns the component references.
 // See https://facebook.github.io/react/docs/more-about-refs.html
 func (t *This) Refs() Refs {
-	refs := t.This.Get("refs").Interface()
-	return refs.(map[string]interface{})
+	return objectToMap(t.This.Get("refs"))
 }
 
 // GetDOMNode returns the component from refs if it has been mounted into the DOM.
@@ -176,9 +154,17 @@ func (p Props) Call(name string, args ...interface{}) *js.Object {
 // Func returns the func with the given name in Props.
 func (p Props) Func(name string) func(args ...interface{}) *js.Object {
 	if o, ok := p[name]; ok {
-		return o.(func(args ...interface{}) *js.Object)
+		return o.(*js.Object).Interface().(func(args ...interface{}) *js.Object)
 	}
 	panic(fmt.Sprintf("func %s not found in properties", name))
+}
+
+// Interface is a convenience method to lookup an interface value from props.
+func (p Props) Interface(key string) interface{} {
+	if val, ok := p[key]; ok {
+		return val.(*js.Object).Interface()
+	}
+	return nil
 }
 
 // Children represents a component's child component(s).
@@ -210,13 +196,16 @@ func (p Props) HasChanged(nextProps Props, keys ...string) bool {
 }
 
 // HasChanged reports whether the value of the state with any of the given keys has changed.
+// Note: This does only reference checking, so no deep equality.
+// See https://github.com/gopherjs/gopherjs/issues/473
 func (s State) HasChanged(nextState State, keys ...string) bool {
 	return hasChanged(s, nextState, keys...)
 }
 
 func hasChanged(m1, m2 map[string]interface{}, keys ...string) bool {
 	for _, key := range keys {
-		if !reflect.DeepEqual(m1[key], m2[key]) {
+		// TODO(bep) DeepEqual
+		if m1[key] != m2[key] {
 			return true
 		}
 	}
