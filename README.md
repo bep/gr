@@ -4,6 +4,10 @@
 [![GoDoc](https://godoc.org/github.com/bep/gr?status.svg)](https://godoc.org/github.com/bep/gr)
 [![Go Report Card](https://goreportcard.com/badge/github.com/bep/gr)](https://goreportcard.com/report/github.com/bep/gr)
 
+**See Also:**
+
+* https://github.com/bep/grcomponents
+* [grouter: react-router bindings](https://github.com/bep/grouter)
 		
 [GopherJS](https://github.com/gopherjs/gopherjs) bindings for Facebook React. 
 
@@ -69,11 +73,6 @@ func (c clickCounter) ShouldComponentUpdate(next gr.Cops) bool {
 
 For help installing GopherJS, please visit [that cool project](https://github.com/gopherjs/gopherjs).
 
-## External Components
-
-Components living outside of this repository:
-
-* [grouter: react-router bindings](https://github.com/bep/grouter)
 
 ## Inspiration
 
