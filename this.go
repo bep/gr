@@ -167,6 +167,30 @@ func (p Props) Interface(key string) interface{} {
 	return nil
 }
 
+// Int is convenience method to lookup a int value from props.
+func (p Props) Int(key string) int {
+	if val, ok := p[key]; ok {
+		return val.(*js.Object).Int()
+	}
+	return 0
+}
+
+// Bool is convenience method to lookup a bool value from props.
+func (p Props) Bool(key string) bool {
+	if val, ok := p[key]; ok {
+		return val.(*js.Object).Bool()
+	}
+	panic(fmt.Sprintf("Props variable %q not found", key))
+}
+
+// String is convenience method to lookup a bool value from props.
+func (p Props) String(key string) string {
+	if val, ok := p[key]; ok {
+		return val.(*js.Object).String()
+	}
+	return ""
+}
+
 // Children represents a component's child component(s).
 // This is a fairly complex topic in Facebook's React, and more support may arrive here, eventually.
 // See https://facebook.github.io/react/tips/children-props-type.html
