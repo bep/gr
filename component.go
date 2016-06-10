@@ -547,6 +547,9 @@ func addEventListeners(c Component, that *This) {
 				if l.preventDefault {
 					event.Call("preventDefault")
 				}
+				if l.stopPropagation {
+					event.Call("stopPropagation")
+				}
 				l.listener(&Event{Object: event, This: that})
 			}
 

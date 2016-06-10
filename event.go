@@ -52,12 +52,21 @@ type EventListener struct {
 	name           string
 	listener       func(*Event)
 	preventDefault bool
+	stopPropagation bool
 	delegate       func(jsEvent *js.Object)
 }
 
 // PreventDefault prevents the default event behaviour in the browser.
 func (l *EventListener) PreventDefault() *EventListener {
 	l.preventDefault = true
+	return l
+}
+
+// StopPropagation prevents further propagation of the current event in the capturing and bubbling phases.
+//
+// See https://developer.mozilla.org/en-US/docs/Web/API/Event/stopPropagation.
+func (l *EventListener) StopPropagation() *EventListener {
+	l.stopPropagation = true
 	return l
 }
 
