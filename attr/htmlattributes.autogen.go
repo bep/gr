@@ -174,7 +174,7 @@ func CrossOrigin(v interface{}) gr.Modifier {
 	return gr.Prop("crossOrigin", v)
 }
 
-// DangerouslySetInnerHTML Provides the ability to insert raw HTML,
+// DangerouslySetInnerHTML Provides the ability to insert raw HTML, 
 // mainly for cooperating with DOM string manipulation libraries.
 func DangerouslySetInnerHTML(v interface{}) gr.Modifier {
 	return gr.Prop("dangerouslySetInnerHTML", v)
@@ -198,6 +198,13 @@ func DateTime(v interface{}) gr.Modifier {
 // Default creates an HTML attribute for 'default'.
 func Default(v interface{}) gr.Modifier {
 	return gr.Prop("default", v)
+}
+
+// For uncontrolled React components, you can use defaultValue  initialize the component with a non-empty value.
+// 
+// See https://facebook.github.io/react/docs/forms.html
+func DefaultValue(v interface{}) gr.Modifier {
+	return gr.Prop("defaultValue", v)
 }
 
 // Defer creates an HTML attribute for 'defer'.
@@ -340,9 +347,9 @@ func ItemProp(v interface{}) gr.Modifier {
 	return gr.Prop("itemProp", v)
 }
 
-// Key adds an optional, unique identifier.
-// When your component shuffles around during render passes, it might be destroyed
-// and recreated due to the diff algorithm. Assigning it a key that persists makes
+// Key adds an optional, unique identifier. 
+// When your component shuffles around during render passes, it might be destroyed 
+// and recreated due to the diff algorithm. Assigning it a key that persists makes 
 // sure the component stays.
 func Key(v interface{}) gr.Modifier {
 	return gr.Prop("key", v)

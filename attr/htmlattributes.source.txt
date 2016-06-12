@@ -13,4 +13,4 @@ selected shape size sizes span spellCheck src srcDoc srcLang srcSet start step
 style summary tabIndex target title type useMap value width wmode wrap
 about datatype inlist prefix property resource typeof vocab
 autoCapitalize autoCorrect color itemProp security unselectable results autoSave
-key ref dangerouslySetInnerHTML
+key ref dangerouslySetInnerHTML defaultValue
