@@ -421,7 +421,9 @@ func makeComponentUpdateFunc(f func(c Cops) bool) *js.Object {
 
 func makeComponentUpdateVoidFunc(f func(c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		f(extractComponentUpdateArgs(arguments))
+		go func() {
+			f(extractComponentUpdateArgs(arguments))
+		}()
 		return nil
 	})
 }

@@ -35,7 +35,7 @@ sure the component stays.`,
 	"ref": "Ref adds an ref to a component, see http://facebook.github.io/react/docs/more-about-refs.html",
 	"dangerouslySetInnerHTML": `DangerouslySetInnerHTML Provides the ability to insert raw HTML, 
 mainly for cooperating with DOM string manipulation libraries.`,
-	"defaultValue": `For uncontrolled React components, you can use defaultValue  initialize the component with a non-empty value.
+	"defaultValue": `DefaultValue can be used to initialize an uncontrolled React component with a non-empty value.
 
 See https://facebook.github.io/react/docs/forms.html`,
 }

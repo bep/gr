@@ -42,7 +42,6 @@ func (e *Event) TargetValue() *js.Object {
 	return e.Target().Get("value")
 }
 
-
 // CurrentTarget gives the currentTarget, i.e. the container triggering this event.
 func (e *Event) CurrentTarget() *js.Object {
 	return e.Get("currentTarget")
@@ -55,11 +54,11 @@ func (e *Event) Int(key string) int {
 
 // An EventListener can be attached to a HTML element to listen for events, mouse clicks etc.
 type EventListener struct {
-	name           string
-	listener       func(*Event)
-	preventDefault bool
+	name            string
+	listener        func(*Event)
+	preventDefault  bool
 	stopPropagation bool
-	delegate       func(jsEvent *js.Object)
+	delegate        func(jsEvent *js.Object)
 }
 
 // PreventDefault prevents the default event behaviour in the browser.
