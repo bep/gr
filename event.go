@@ -37,6 +37,12 @@ func (e *Event) Target() *js.Object {
 	return e.Get("target")
 }
 
+// TargetValue gives the target triggering this event's value. For a input select, this will be the selected value.
+func (e *Event) TargetValue() *js.Object {
+	return e.Target().Get("value")
+}
+
+
 // CurrentTarget gives the currentTarget, i.e. the container triggering this event.
 func (e *Event) CurrentTarget() *js.Object {
 	return e.Get("currentTarget")
