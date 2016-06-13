@@ -17,6 +17,7 @@ limitations under the License.
 package gr
 
 import (
+	"github.com/gopherjs/gopherjs/js"
 	"strings"
 )
 
@@ -24,14 +25,20 @@ type textEl struct {
 	text string
 }
 
-func (s *textEl) Modify(in *Element) {
-	in.text = s.text
-}
-
 // Text creates a text element.
 func Text(i interface{}) Modifier {
 	text := toString(i)
 	return &textEl{text: text}
+}
+
+// Modify implements the Modifier interface.
+func (s *textEl) Modify(in *Element) {
+	in.children = append(in.children, s)
+}
+
+// Node implements the component interface.
+func (s *textEl) Node() *js.Object {
+	return js.Global.Get("Object").New(s.text)
 }
 
 type cssClasses []string

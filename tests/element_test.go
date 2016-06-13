@@ -60,3 +60,14 @@ func TestRenderNestedComplex(t *testing.T) {
 		"<div><div><p>P1</p></div><div><p>P2</p><div><p>P3</p><div /></div></div><div /></div>",
 		tree.String())
 }
+
+func TestRenderRegularTextLast(t *testing.T) {
+	div := el.Div(
+		el.Bold(gr.Text("Bold")),
+		el.Italic(gr.Text("Italic")),
+		gr.Text("Regular"),
+	)
+	tree := grt.ShallowRender(div)
+
+	grt.Equal(t, "<div><b>Bold</b><i>Italic</i>Regular</div>", tree.String())
+}

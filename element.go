@@ -43,7 +43,6 @@ type Element struct {
 	style          map[string]interface{}
 	eventListeners []*EventListener
 
-	text     string
 	children []Component
 
 	elFactory elementFactory
@@ -105,10 +104,6 @@ func (e *Element) createElement() *js.Object {
 	}
 
 	var args []interface{}
-
-	if e.text != "" {
-		args = append(args, e.text)
-	}
 
 	if len(e.children) > 0 {
 		for _, c := range e.children {
