@@ -242,54 +242,51 @@ func New(r Renderer, options ...Option) *ReactComponent {
 	// mixins https://github.com/bep/gr/issues/24
 	// statics  https://github.com/bep/gr/issues/25
 
-	// This is the first lifecycle method with 'this' provided.
-	// We use this to init the this object if provided.
-
-	thisInit := extractThisInitializer(r)
+	ts := extractThisSetter(r)
 
 	// Every component needs to render itself.
-	root.reactClass.render = makeRenderFunc(displayName, r.Render)
+	root.reactClass.render = makeRenderFunc(ts, displayName, r.Render)
 
 	// Optional lifecycle implementations below.
 	if v, ok := r.(StateInitializer); ok {
-		root.reactClass.getInitialState = makeStateFunc(thisInit, v.GetInitialState)
-	} else if thisInit != nil {
+		root.reactClass.getInitialState = makeStateFunc(ts, v.GetInitialState)
+	} else if ts != nil {
 		root.reactClass.getInitialState = js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-			thisInit.InitThis(this)
+			ts.SetThis(this)
 			return nil
 		})
 	}
 
 	if v, ok := r.(ChildContextProvider); ok {
-		root.reactClass.getChildContext, root.reactClass.childContextTypes = makeChildContextFunc(v.GetChildContext)
+		root.reactClass.getChildContext, root.reactClass.childContextTypes = makeChildContextFunc(ts, v.GetChildContext)
 	}
 
 	if v, ok := r.(ShouldComponentUpdate); ok {
-		root.reactClass.shouldComponentUpdate = makeComponentUpdateFunc(v.ShouldComponentUpdate)
+		root.reactClass.shouldComponentUpdate = makeComponentUpdateFunc(ts, v.ShouldComponentUpdate)
 	}
 
 	if v, ok := r.(ComponentWillUpdate); ok {
-		root.reactClass.componentWillUpdate = makeComponentUpdateVoidFunc(v.ComponentWillUpdate)
+		root.reactClass.componentWillUpdate = makeComponentUpdateVoidFunc(ts, v.ComponentWillUpdate)
 	}
 
 	if v, ok := r.(ComponentDidUpdate); ok {
-		root.reactClass.componentDidUpdate = makeComponentUpdateVoidFunc(v.ComponentDidUpdate)
+		root.reactClass.componentDidUpdate = makeComponentUpdateVoidFunc(ts, v.ComponentDidUpdate)
 	}
 
 	if v, ok := r.(ComponentWillReceiveProps); ok {
-		root.reactClass.componentWillReceiveProps = makeComponentPropertyReceiverFunc(v.ComponentWillReceiveProps)
+		root.reactClass.componentWillReceiveProps = makeComponentPropertyReceiverFunc(ts, v.ComponentWillReceiveProps)
 	}
 
 	if v, ok := r.(ComponentWillMount); ok {
-		root.reactClass.componentWillMount = makeVoidFunc(v.ComponentWillMount, true)
+		root.reactClass.componentWillMount = makeVoidFunc(ts, v.ComponentWillMount, true)
 	}
 
 	if v, ok := r.(ComponentDidMount); ok {
-		root.reactClass.componentDidMount = makeVoidFunc(v.ComponentDidMount, true)
+		root.reactClass.componentDidMount = makeVoidFunc(ts, v.ComponentDidMount, true)
 	}
 
 	if v, ok := r.(ComponentWillUnmount); ok {
-		root.reactClass.componentWillUnmount = makeVoidFunc(v.ComponentWillUnmount, true)
+		root.reactClass.componentWillUnmount = makeVoidFunc(ts, v.ComponentWillUnmount, true)
 	}
 
 	for _, opt := range options {
@@ -359,6 +356,7 @@ func (r *ReactComponent) CreateElement(props Props, children ...Component) *Elem
 
 func createElementElementFactory(r *ReactComponent) func(e *Element) *js.Object {
 	return func(e *Element) *js.Object {
+
 		var elem *js.Object
 
 		var args []interface{}
@@ -372,14 +370,15 @@ func createElementElementFactory(r *ReactComponent) func(e *Element) *js.Object 
 		if r.needsCreate {
 			elem = react.Call("createElement", r.Node(), e.properties, args)
 		} else {
+
 			elem = r.Node().Invoke(e.properties, args)
 		}
 		return elem
 	}
 }
 
-func extractThisInitializer(r Renderer) ThisInitializer {
-	var thisInit ThisInitializer
+func extractThisSetter(r Renderer) ThisSetter {
+	var thisSetter ThisSetter
 
 	rv := reflect.ValueOf(r)
 
@@ -393,13 +392,13 @@ func extractThisInitializer(r Renderer) ThisInitializer {
 		for i := 0; i < rt.NumField(); i++ {
 			fv := rv.Field(i)
 			if fv.CanInterface() {
-				if init, ok := fv.Interface().(ThisInitializer); ok {
+				if init, ok := fv.Interface().(ThisSetter); ok {
 					if fv.IsNil() {
 						newVal := reflect.New(rt.Field(i).Type.Elem())
 						fv.Set(newVal)
-						thisInit = newVal.Interface().(ThisInitializer)
+						thisSetter = newVal.Interface().(ThisSetter)
 					} else {
-						thisInit = init
+						thisSetter = init
 					}
 					// We should maybe check for others and report an error, but for now the first one wins.
 					break
@@ -410,24 +409,33 @@ func extractThisInitializer(r Renderer) ThisInitializer {
 
 	}
 
-	return thisInit
+	return thisSetter
 }
 
-func makeComponentUpdateFunc(f func(c Cops) bool) *js.Object {
+func makeComponentUpdateFunc(ts ThisSetter, f func(c Cops) bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		if ts != nil {
+			ts.SetThis(this)
+		}
 		return f(extractComponentUpdateArgs(arguments))
 	})
 }
 
-func makeComponentUpdateVoidFunc(f func(c Cops)) *js.Object {
+func makeComponentUpdateVoidFunc(ts ThisSetter, f func(c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		if ts != nil {
+			ts.SetThis(this)
+		}
 		f(extractComponentUpdateArgs(arguments))
 		return nil
 	})
 }
 
-func makeComponentPropertyReceiverFunc(f func(c Cops)) *js.Object {
+func makeComponentPropertyReceiverFunc(ts ThisSetter, f func(c Cops)) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		if ts != nil {
+			ts.SetThis(this)
+		}
 		data := extractComponentUpdateArgs(arguments)
 		f(data)
 		return nil
@@ -455,8 +463,11 @@ func extractComponentUpdateArgs(arguments []*js.Object) Cops {
 	return Cops{Props: props, State: state, Context: context}
 }
 
-func makeVoidFunc(f func(), assumeBlocking bool) *js.Object {
+func makeVoidFunc(ts ThisSetter, f func(), assumeBlocking bool) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		if ts != nil {
+			ts.SetThis(this)
+		}
 		if assumeBlocking {
 			go func() {
 				f()
@@ -468,18 +479,21 @@ func makeVoidFunc(f func(), assumeBlocking bool) *js.Object {
 	})
 }
 
-func makeStateFunc(thisInit ThisInitializer, f func() State) *js.Object {
+func makeStateFunc(ts ThisSetter, f func() State) *js.Object {
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
-		if thisInit != nil {
-			thisInit.InitThis(this)
+		if ts != nil {
+			ts.SetThis(this)
 		}
 		return f()
 	})
 }
 
-func makeChildContextFunc(f func() Context) (*js.Object, js.M) {
+func makeChildContextFunc(ts ThisSetter, f func() Context) (*js.Object, js.M) {
 
 	getChildContext := js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		if ts != nil {
+			ts.SetThis(this)
+		}
 		return f()
 	})
 
@@ -516,9 +530,12 @@ func (i *incrementer) next() int {
 	return i.counter
 }
 
-func makeRenderFunc(s string, f func() Component) *js.Object {
+func makeRenderFunc(ts ThisSetter, s string, f func() Component) *js.Object {
 
 	return js.MakeFunc(func(this *js.Object, arguments []*js.Object) interface{} {
+		if ts != nil {
+			ts.SetThis(this)
+		}
 
 		comp := f()
 
@@ -526,9 +543,11 @@ func makeRenderFunc(s string, f func() Component) *js.Object {
 			return nil
 		}
 
+		that := NewThis(this)
+
 		// TODO(bep) refactor
 		if e, ok := comp.(*Element); ok {
-			addEventListeners(comp, NewThis(this))
+			addEventListeners(comp, that)
 			idFactory := &incrementer{}
 			addMissingKeys(s, e, idFactory)
 		}

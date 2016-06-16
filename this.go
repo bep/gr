@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"github.com/gopherjs/gopherjs/js"
+	"reflect"
 )
 
 // This is named for what it represents: The this context representation from the
@@ -28,15 +29,15 @@ type This struct {
 	This *js.Object
 }
 
-// InitThis implements the ThisInitializer.
-func (t *This) InitThis(that *js.Object) {
+// SetThis implements the ThisSetter interface.
+func (t *This) SetThis(that *js.Object) {
 	t.This = that
 }
 
-// ThisInitializer must be implemented by a component if JavaScript's this is needed.
+// ThisSetter must be implemented by a component if JavaScript's this is needed.
 // The simplest way of doing this is to just embed a This on the component struct.
-type ThisInitializer interface {
-	InitThis(this *js.Object)
+type ThisSetter interface {
+	SetThis(this *js.Object)
 }
 
 // Props returns the properties set; this is what you would expect to find in
@@ -145,6 +146,15 @@ type State map[string]interface{}
 // See https://facebook.github.io/react/docs/more-about-refs.html
 type Refs map[string]interface{}
 
+// Copy creates a copy of this Props.
+func (p Props) Copy() Props {
+	copy := Props{}
+	for k, v := range p {
+		copy[k] = v
+	}
+	return copy
+}
+
 // Call calls a func with the given name in Props with the given args.
 func (p Props) Call(name string, args ...interface{}) *js.Object {
 	f := p.Func(name)
@@ -230,6 +240,17 @@ func hasChanged(m1, m2 map[string]interface{}, keys ...string) bool {
 	for _, key := range keys {
 		// TODO(bep) DeepEqual
 		if m1[key] != m2[key] {
+			return true
+		}
+	}
+	return false
+}
+
+// HasChangedDeeply reports whether the value of the state with any of the given keys has changed.
+// This uses reflect.DeepEqual. For shallow equality checking, see HasChanged.
+func (s State) HasChangedDeeply(nextState State, keys ...string) bool {
+	for _, key := range keys {
+		if !reflect.DeepEqual(s[key], nextState[key]) {
 			return true
 		}
 	}
