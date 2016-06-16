@@ -98,3 +98,30 @@ func objectToMap(o *js.Object) map[string]interface{} {
 
 	return m
 }
+
+
+
+// TODO(bep) get rid of all below.
+// HostInfo represents the location info from the browser window.
+type HostInfo struct {
+	Path     string
+	Port     int
+	Host     string
+	Href     string
+	Protocol string
+	Origin   string
+}
+
+// Location returns info about the current browser location.
+func Location() HostInfo {
+	l := js.Global.Get("window").Get("location").Interface().(map[string]interface{})
+	loc := HostInfo{
+		Path:     toString(l["pathname"]),
+		Port:     toInt(l["port"]),
+		Host:     toString(l["hostname"]),
+		Href:     toString(l["href"]),
+		Protocol: toString(l["protocol"]),
+		Origin:   toString(l["origin"])}
+
+	return loc
+}

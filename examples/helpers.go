@@ -126,3 +126,5 @@ func (c ClickCounter) ShouldComponentUpdate(
 func (c ClickCounter) ComponentDidMount() {
 	println("ClickCounter: ComponentDidMount")
 }
+
+

@@ -35,9 +35,8 @@ type elapser struct {
 
 // Implements the Renderer interface.
 func (e elapser) Render() gr.Component {
-	elapsed := e.Props()["elapsed"]
-	title := e.Props()["title"].(string) // TODO(bep cleanup props handling
-
+	elapsed := e.Props().String("elapsed")
+	title := e.Props().String("title")
 	message := fmt.Sprintf("Go Timer has been successfully running for %v seconds.", elapsed)
 
 	internalCounter := examples.Alert("info", el.Strong(gr.Text(message)))
