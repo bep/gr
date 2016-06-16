@@ -99,10 +99,8 @@ func objectToMap(o *js.Object) map[string]interface{} {
 	return m
 }
 
-
-
-// TODO(bep) get rid of all below.
 // HostInfo represents the location info from the browser window.
+// TODO(bep) get rid of all below.
 type HostInfo struct {
 	Path     string
 	Port     int
