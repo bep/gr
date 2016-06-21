@@ -21,9 +21,10 @@ import (
 	"fmt"
 	"strings"
 
+	"reflect"
+
 	"github.com/bep/gr/support"
 	"github.com/gopherjs/gopherjs/js"
-	"reflect"
 )
 
 var (
@@ -547,7 +548,7 @@ func makeRenderFunc(ts ThisSetter, s string, f func() Component) *js.Object {
 
 		// TODO(bep) refactor
 		if e, ok := comp.(*Element); ok {
-			addEventListeners(comp, that)
+			addEventListeners(ts, comp, that)
 			idFactory := &incrementer{}
 			addMissingKeys(s, e, idFactory)
 		}
@@ -559,10 +560,13 @@ func makeRenderFunc(ts ThisSetter, s string, f func() Component) *js.Object {
 	})
 }
 
-func addEventListeners(c Component, that *This) {
+func addEventListeners(ts ThisSetter, c Component, that *This) {
 	if e, ok := c.(*Element); ok {
 		for _, l := range e.eventListeners {
 			l.delegate = func(event *js.Object) {
+				if ts != nil {
+					ts.SetThis(that.This)
+				}
 				if l.preventDefault {
 					event.Call("preventDefault")
 				}
@@ -576,7 +580,7 @@ func addEventListeners(c Component, that *This) {
 
 		}
 		for _, child := range e.children {
-			addEventListeners(child, that)
+			addEventListeners(ts, child, that)
 		}
 
 	}

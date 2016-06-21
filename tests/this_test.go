@@ -20,11 +20,12 @@ import (
 	"testing"
 
 	"fmt"
+	"sync"
+
 	"github.com/bep/gr"
 	"github.com/bep/gr/el"
 	"github.com/bep/gr/evt"
 	"github.com/bep/gr/tests/grt"
-	"sync"
 )
 
 // TODO(bep)

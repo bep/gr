@@ -19,8 +19,9 @@ package gr
 import (
 	"fmt"
 
-	"github.com/gopherjs/gopherjs/js"
 	"reflect"
+
+	"github.com/gopherjs/gopherjs/js"
 )
 
 // This is named for what it represents: The this context representation from the
