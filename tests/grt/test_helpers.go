@@ -81,16 +81,11 @@ type RenderedTree struct {
 	//findComponentLike: [Function],
 	GetRenderOutput func() map[string]interface{} `js:"getRenderOutput"`
 	toString        func() string                 `js:"toString"`
-	Props           Props                         `js:"props"`
+	Props           *js.Object                    `js:"props"`
 	Type            string                        `js:"type"`
 
 	context gr.Context
 }
-
-// Props represents the properties set on a React element.
-// This is the same as gr.Props, but reimplemented here so we can add
-// test methods to it.
-type Props map[string]interface{}
 
 // Matcher used to find a component in the component tree.
 type Matcher struct {
@@ -99,8 +94,8 @@ type Matcher struct {
 
 // CallEventListener is a convenience func to simulate button clicks etc.
 // by calling the listener methods by name.
-func (p Props) CallEventListener(name string, args ...interface{}) *js.Object {
-	return p[name].(func(...interface{}) *js.Object)(name, args)
+func (t *RenderedTree) CallEventListener(name string, args ...interface{}) *js.Object {
+	return t.Props.Call(name, args...)
 }
 
 // NewMatcher creates a new matcher.

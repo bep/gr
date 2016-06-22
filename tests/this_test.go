@@ -28,35 +28,35 @@ import (
 	"github.com/bep/gr/tests/grt"
 )
 
-// TODO(bep)
-func _TestPropsFunc(t *testing.T) {
+func TestPropsFunc(t *testing.T) {
 	clickVal := 0
 
 	propsFunc := func(val int) {
 		clickVal += val
 	}
 
-	clickListener := func(event *gr.Event) {
-		//this.Props().Call("propsFunc", 2)
-		//this.Props().Func("propsFunc")(2)
-
-	}
-
-	button := el.Button(
-		gr.Text("Clickable Button"),
-		evt.Click(clickListener),
-	)
-
-	component := gr.NewSimpleComponent(button)
+	cb := &testClickableButtons{}
+	component := gr.New(cb)
 	elem := component.CreateElement(gr.Props{"propsFunc": propsFunc})
+
 	tree := grt.ShallowRender(elem)
 
+	firstButton := tree.Dive("p", "button")
+
+	// 2 x 3
 	for i := 0; i < 2; i++ {
-		tree.Props.CallEventListener("onClick")
+		firstButton.CallEventListener("onClick")
 	}
 
-	grt.Equal(t, "<button onClick={function()}>Clickable Button</button>", tree.String())
-	grt.Equal(t, 8, clickVal)
+	secondButton := tree.Dive("footer", "button")
+
+	// 3 x 8
+	for i := 0; i < 3; i++ {
+		secondButton.CallEventListener("onClick")
+	}
+
+	grt.Equal(t, "<div><p><button onClick={function()}>Clickable Button 1</button></p><footer><button onClick={function()}>Clickable Button 2</button></footer></div>", tree.String())
+	grt.Equal(t, 30, clickVal)
 
 }
 
@@ -81,7 +81,7 @@ func TestBindThis(t *testing.T) {
 	compPtr := gr.New(&thisCompEmbed{})
 	compNamed := gr.New(&thisCompNamed{})
 
-	grt.Equal(t, "<div>embed<nil></div>", grt.ShallowRender(compPtr.CreateElement(gr.Props{"id": "embed"})).String())
+	grt.Equal(t, "<div>embed</div>", grt.ShallowRender(compPtr.CreateElement(gr.Props{"id": "embed"})).String())
 	grt.Equal(t, "<div>named</div>", grt.ShallowRender(compNamed.CreateElement(gr.Props{"id": "named"})).String())
 }
 
@@ -97,24 +97,19 @@ func TestBindThisVariations(t *testing.T) {
 			defer wg.Done()
 			props := gr.Props{}
 
-			if ii == 10 {
-				// create a new component
-				comp = gr.New(&thisCompEmbed{})
-			}
-
 			if ii%2 == 0 {
-				props = gr.Props{"id": fmt.Sprintf("%d", ii)}
+				props = gr.Props{"id": fmt.Sprintf("%d", ii), "idFunc": tc.ID}
 			}
 			if ii > 0 && ii%4 == 0 {
 				props = gr.Props{"id": fmt.Sprintf("%d", ii), "foo": "bar"}
 			}
 			elem := comp.CreateElement(props)
 			tree := grt.ShallowRender(elem)
-			expect := "<div><nil><nil></div>"
+			expect := "<div></div>"
 			if ii > 0 && ii%4 == 0 {
 				expect = fmt.Sprintf("<div>%dbar</div>", ii)
 			} else if ii%2 == 0 {
-				expect = fmt.Sprintf("<div>%d<nil></div>", ii)
+				expect = fmt.Sprintf("<div>%d%d</div>", ii, ii)
 			}
 
 			grt.Equal(t, expect, tree.String())
@@ -130,9 +125,16 @@ type thisCompEmbed struct {
 }
 
 func (c *thisCompEmbed) Render() gr.Component {
-	thisStr := fmt.Sprintf("%v", c.This.Props()["id"])
-	thisStr += fmt.Sprintf("%v", c.This.Props()["foo"])
+	thisStr := c.Props().String("id")
+	thisStr += c.Props().String("foo")
+	if _, ok := c.Props()["idFunc"]; ok {
+		thisStr += c.Props().Call("idFunc").String()
+	}
 	return el.Div(gr.Text(thisStr))
+}
+
+func (c *thisCompEmbed) ID() string {
+	return c.Props().String("id")
 }
 
 type thisCompNamed struct {
@@ -150,4 +152,37 @@ type thisCompChildren struct {
 
 func (c *thisCompChildren) Render() gr.Component {
 	return el.Div(c.This.Children().Element())
+}
+
+type testClickableButtons struct {
+	*gr.This
+}
+
+func (c *testClickableButtons) Render() gr.Component {
+	clickListener := func(event *gr.Event) {
+		c.Props().Call("propsFunc", 3)
+
+	}
+
+	button1 := el.Button(
+		gr.Text("Clickable Button 1"),
+		evt.Click(clickListener),
+	)
+
+	button2 := el.Button(
+		gr.Text("Clickable Button 2"),
+		evt.Click(c.createClickListener(4)),
+	)
+
+	return el.Div(
+		el.Paragraph(button1),
+		el.Footer(button2),
+	)
+}
+
+func (c *testClickableButtons) createClickListener(increment int) gr.Listener {
+	return func(event *gr.Event) {
+		event.This.Props().Call("propsFunc", increment)
+		c.Props().Call("propsFunc", increment)
+	}
 }

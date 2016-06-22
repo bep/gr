@@ -42,7 +42,7 @@ func TestClickableButton(t *testing.T) {
 	tree := grt.ShallowRender(elem)
 
 	for i := 0; i < 42; i++ {
-		tree.Props.CallEventListener("onClick")
+		tree.CallEventListener("onClick")
 	}
 
 	grt.Equal(t, "<button onClick={function()}>Clickable Button</button>", tree.String())
