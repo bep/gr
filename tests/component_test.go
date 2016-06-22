@@ -108,6 +108,25 @@ func TestNew(t *testing.T) {
 
 }
 
+func TestCloneElement(t *testing.T) {
+	c := gr.New(&testTwoButtons{})
+
+	firstElement := c.CreateElement(gr.Props{"b1": "b1-1", "b2": "b2-1"})
+
+	r := grt.ShallowRender(firstElement)
+	grt.Equal(t, "<div><button>b1-1</button><button>b2-1</button></div>", r.String())
+
+	for i := 0; i < 3; i++ {
+		b2New := fmt.Sprintf("b2-1%d", i)
+		expect := fmt.Sprintf("<div><button>b1-1</button><button>b2-1%d</button></div>", i)
+
+		clonedElement := c.CloneElement(gr.Props{"b2": b2New})
+
+		r = grt.ShallowRender(clonedElement)
+		grt.Equal(t, expect, r.String())
+	}
+}
+
 func TestCompositeComponents(t *testing.T) {
 	c := newTestCompositeComponent()
 	rc := gr.New(c)
@@ -398,4 +417,17 @@ func (l *testLifecycler) ComponentWillUnmount() {
 func (l *testLifecycler) ComponentDidMount() {
 	l.visited("ComponentDidMount")
 	return
+}
+
+type testTwoButtons struct {
+	*gr.This
+}
+
+func (c *testTwoButtons) Render() gr.Component {
+	b1Text := c.Props().String("b1")
+	b2Text := c.Props().String("b2")
+	return el.Div(
+		el.Button(gr.Text(b1Text)),
+		el.Button(gr.Text(b2Text)),
+	)
 }

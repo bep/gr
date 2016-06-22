@@ -69,6 +69,9 @@ type ReactComponent struct {
 	// The React.createClass response.
 	node *js.Object
 
+	// Prototype cached for the cloning purpose.
+	elementPrototype *js.Object
+
 	// The minimum interface needed to display something.
 	r Renderer
 
@@ -355,27 +358,69 @@ func (r *ReactComponent) CreateElement(props Props, children ...Component) *Elem
 	return &Element{properties: props, children: children, elFactory: createElementElementFactory(r)}
 }
 
+// CloneElement will, provided that an element has already been created for this component, clone that element with the
+// original element's props with the new props merged in shallowly.
+// New children will replace existing children.
+// If this is the first invocation, a new element will be created.
+// This may be be slightly faster when creating elements in a tight loop.
+//
+// See https://facebook.github.io/react/docs/top-level-api.html#react.cloneelement
+func (r *ReactComponent) CloneElement(props Props, children ...Component) *Element {
+	return &Element{properties: props, children: children, elFactory: cloneOrCreateElementElementFactory(r)}
+}
+
+func cloneOrCreateElementElementFactory(r *ReactComponent) func(e *Element) *js.Object {
+	return func(e *Element) *js.Object {
+		if r.elementPrototype == nil {
+			r.elementPrototype = createOrInvoke(r.Node(), e, r.needsCreate)
+			return r.elementPrototype
+		}
+		return cloneElement(r.elementPrototype, e)
+	}
+}
+
 func createElementElementFactory(r *ReactComponent) func(e *Element) *js.Object {
 	return func(e *Element) *js.Object {
-
-		var elem *js.Object
-
-		var args []interface{}
-
-		if len(e.children) > 0 {
-			for _, c := range e.children {
-				args = append(args, c.Node())
-			}
-		}
-
-		if r.needsCreate {
-			elem = react.Call("createElement", r.Node(), e.properties, args)
-		} else {
-
-			elem = r.Node().Invoke(e.properties, args)
-		}
+		elem := createOrInvoke(r.Node(), e, r.needsCreate)
+		r.elementPrototype = elem
 		return elem
 	}
+}
+
+func cloneElement(prototype *js.Object, e *Element) *js.Object {
+	var elem *js.Object
+
+	var args []interface{}
+
+	if len(e.children) > 0 {
+		for _, c := range e.children {
+			args = append(args, c.Node())
+		}
+	}
+
+	elem = react.Call("cloneElement", prototype, e.properties, args)
+
+	return elem
+}
+
+func createOrInvoke(node *js.Object, e *Element, needsCreate bool) *js.Object {
+	var elem *js.Object
+
+	var args []interface{}
+
+	if len(e.children) > 0 {
+		for _, c := range e.children {
+			args = append(args, c.Node())
+		}
+	}
+
+	if needsCreate {
+		elem = react.Call("createElement", node, e.properties, args)
+	} else {
+
+		elem = node.Invoke(e.properties, args)
+	}
+	return elem
 }
 
 func extractThisSetter(r Renderer) ThisSetter {
