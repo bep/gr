@@ -17,7 +17,7 @@ fmt:
 	done
 
 lint:
-	@if [ "`golint ./... | tee /dev/stderr`" ]; then \
+	@if [ "`golint -min_confidence 0.85 ./... | tee /dev/stderr`" ]; then \
 		echo "^ golint errors!" && echo && exit 1; \
 	fi
 
