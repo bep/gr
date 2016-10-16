@@ -24,7 +24,7 @@ There are some runnable examples in `/examples`. Just navigate to that folder an
 ```bash
 gopherjs serve
 ```
-Then navigate to [http://localhost:8080/github.com/bep/gr/examples/](http://localhost:8080/github.com/bep/gr/examples/).
+Then navigate to [http://github.com/bep/gr/examples/](http://github.com/bep/gr/examples/).
 
 To get a sense of the API, here is the [click-counter](https://github.com/bep/gr/blob/master/examples/basic-click-counter/main.go) example:
 
