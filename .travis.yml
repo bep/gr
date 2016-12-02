@@ -5,7 +5,7 @@ env:
   - SOURCE_MAP_SUPPORT=false TRAVIS_NODE_VERSION="5.1" CXX="g++-4.8"
 
 go:
-  - 1.7  
+  - 1.7.4
   
 install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh && nvm install $TRAVIS_NODE_VERSION
