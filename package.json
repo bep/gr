@@ -15,7 +15,7 @@
     "react-addons-test-utils": "^15.4.2",
     "react-bootstrap": "^0.30.7",
     "react-element-to-string": "^1.0.2",
-    "skin-deep": "git://github.com/glenjamin/skin-deep"
+    "skin-deep": "1.0.0-alpha2"
   },
   "scripts": {
     "test": "gopherjs test github.com/bep/gr/tests"
