@@ -202,7 +202,7 @@ func TestRequire(t *testing.T) {
 
 	r := grt.ShallowRender(elem)
 
-	grt.Equal(t, `<div closeLabel="Close Alert" bsClass="alert" bsStyle="info" role="alert" className="alert alert-info"></div>`, r.String())
+	grt.Equal(t, `<div role="alert" className="alert alert-info"></div>`, r.String())
 
 }
 
