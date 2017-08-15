@@ -3,7 +3,7 @@
 for D in `find . -type d -not -path '*/\.*'`
 do
     pushd $D
-	gopherjs -m build
+	gopherjs build -m
 	popd
 done
 
