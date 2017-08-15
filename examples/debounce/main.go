@@ -33,8 +33,8 @@ func (m mouseTracker) Render() gr.Component {
 
 	elem := el.Div(
 		gr.Style("backgroundColor", "#3399ff"),
-		gr.Style("width", "500px"),
-		gr.Style("height", "500px"),
+		gr.Style("max-width", "500px"),
+		gr.Style("height", "400px"),
 		gr.Style("padding", "30px"),
 		el.Header1(
 			gr.Style("color", "white"),
