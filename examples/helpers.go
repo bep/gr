@@ -11,23 +11,10 @@ import (
 )
 
 // Example is a wrapper for the examples
-func Example(title string, mods ...gr.Modifier) *gr.Element {
-
-	links := el.Div(gr.CSS("list-group"),
-		exampleListItem(title, "basic", "Basic"),
-		exampleListItem(title, "basic-click-counter", "Basic Click-counter"),
-		exampleListItem(title, "composition", "Component Composition"),
-		exampleListItem(title, "lifecycle", "Lifecycle"),
-		exampleListItem(title, "interop", "Interop"),
-		exampleListItem(title, "ajax", "Ajax"),
-		exampleListItem(title, "router", "React Router"),
-		exampleListItem(title, "debounce", "Debounced Mouse Events"),
-	)
-
+func Example(title string, body ...gr.Modifier) *gr.Element {
+	mods := gr.Modifiers(body)
 	elem := el.Div(gr.CSS("panel", "panel-primary"),
-		el.Div(gr.CSS("panel-heading"), el.Header1(gr.Text(title))),
-		el.Div(append(mods, gr.CSS("panel-body"),
-			el.Header3(gr.Text("More examples")), links)...),
+		el.Div(gr.CSS("panel-body"), mods),
 		el.Div(gr.CSS("panel-footer"),
 			el.Div(
 				el.Emphasis(gr.Text("Facebook React in Go: ")),
