@@ -17,7 +17,7 @@
 
 **NOTE: Make sure that your GopherJS is up-to-date before running these: `go get -u github.com/gopherjs/gopherjs`**
 
-For a live demo of the examples below, see [http://bego.io/goreact/examples/basic/](http://bego.io/goreact/examples/basic/)  (may not be up-to-date).
+For a live demo of the examples below, see [http://bego.io/gr/](http://bego.io/gr/)  (may not be up-to-date).
 
 There are some runnable examples in `/examples`. Just navigate to that folder and do a:
 
