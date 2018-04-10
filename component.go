@@ -28,14 +28,15 @@ import (
 )
 
 var (
-	react    = js.Global.Get("React")
-	reactDOM = js.Global.Get("ReactDOM")
+	react            = js.Global.Get("React")
+	reactDOM         = js.Global.Get("ReactDOM")
+	reactCreateClass *js.Object
 )
 
 func init() {
+	var err error
 	if react == js.Undefined || reactDOM == js.Undefined {
 		// Require as a fallback
-		var err error
 		if react, err = support.Require("react"); err != nil {
 			panic(fmt.Sprintf("Cannot find React"))
 		}
@@ -43,6 +44,11 @@ func init() {
 			panic(fmt.Sprintf("Cannot find ReactDOM"))
 		}
 	}
+
+	if reactCreateClass, err = support.Require("create-react-class"); err != nil {
+		panic(fmt.Sprintf("Cannot find create-react-class"))
+	}
+
 }
 
 // A Component represents a React JS component.
@@ -305,7 +311,7 @@ func New(r Renderer, options ...Option) *ReactComponent {
 
 	root.handleOptionsOnPrepare()
 
-	class := react.Call("createClass", root.reactClass.Object)
+	class := reactCreateClass.Invoke(root.reactClass.Object)
 
 	root.node = react.Call("createFactory", class)
 

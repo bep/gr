@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"sort"
 	"testing"
-
 	"time"
 
 	"github.com/bep/gr"
@@ -182,7 +181,7 @@ func TestNewWithApply(t *testing.T) {
 	grt.Equal(t, applied, reactComponent.Node())
 }
 
-func TestComponentFromGlobal(t *testing.T) {
+func _TestComponentFromGlobal(t *testing.T) {
 	rc := gr.FromGlobal("Hello")
 
 	grt.NotNil(t, rc)
